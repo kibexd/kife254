@@ -109,7 +109,7 @@ export default function Home() {
                   className="absolute inset-0"
                 >
                   <img
-                    src="/dp1.jpg"
+                    src="/jpg.jpg"
                     alt="Enock Kibe"
                     className="w-full h-full object-cover profile-image"
                   />
