@@ -79,50 +79,76 @@ var _s = __turbopack_context__.k.signature(), _s1 = __turbopack_context__.k.sign
 "use client";
 ;
 const LayoutContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createContext"])(undefined);
+// Debounce utility function
+const debounce = (func, delay)=>{
+    let timeout;
+    return (...args)=>{
+        clearTimeout(timeout);
+        timeout = setTimeout(()=>func(...args), delay);
+    };
+};
 function LayoutProvider({ children }) {
     _s();
+    // Initialize layoutMode to a server-safe default. It will be updated client-side.
     const [layoutMode, setLayoutMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("standard");
     const [isTransitioning, setIsTransitioning] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null); // null means not determined yet
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "LayoutProvider.useEffect": ()=>{
+            // This effect runs only on the client after initial render
+            const initialIsMobile = window.innerWidth < 768;
+            setIsMobile(initialIsMobile);
+            const savedLayout = localStorage.getItem("layoutMode");
+            let initialLayout;
+            if (initialIsMobile) {
+                initialLayout = "standard";
+            } else {
+                initialLayout = savedLayout || "sidebar"; // Default to sidebar if desktop and no saved preference
+            }
+            setLayoutMode(initialLayout);
             const handleResize = {
                 "LayoutProvider.useEffect.handleResize": ()=>{
-                    setIsMobile(window.innerWidth < 768);
+                    const currentIsMobile = window.innerWidth < 768;
+                    if (isMobile !== currentIsMobile) {
+                        setIsMobile(currentIsMobile);
+                    }
                 }
             }["LayoutProvider.useEffect.handleResize"];
-            handleResize();
-            window.addEventListener("resize", handleResize);
+            const debouncedHandleResize = debounce(handleResize, 100);
+            window.addEventListener("resize", debouncedHandleResize);
             return ({
-                "LayoutProvider.useEffect": ()=>window.removeEventListener("resize", handleResize)
+                "LayoutProvider.useEffect": ()=>window.removeEventListener("resize", debouncedHandleResize)
             })["LayoutProvider.useEffect"];
         }
-    }["LayoutProvider.useEffect"], []);
+    }["LayoutProvider.useEffect"], []); // Run only once on mount
+    // Effect to update layoutMode when isMobile changes (after initial setup)
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "LayoutProvider.useEffect": ()=>{
-            const savedLayout = localStorage.getItem("layoutMode");
+            // Only proceed if isMobile has been determined
+            if (isMobile === null) return;
+            let desiredLayout;
             if (isMobile) {
-                setLayoutMode("standard");
-            } else if (savedLayout) {
-                setLayoutMode(savedLayout);
+                desiredLayout = "standard";
+            } else {
+                const savedLayout = localStorage.getItem("layoutMode");
+                desiredLayout = savedLayout || "sidebar";
+            }
+            if (layoutMode !== desiredLayout) {
+                setLayoutMode(desiredLayout);
             }
         }
     }["LayoutProvider.useEffect"], [
-        isMobile
-    ]);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "LayoutProvider.useEffect": ()=>{
-            if (!isMobile) {
-                localStorage.setItem("layoutMode", layoutMode);
-            }
-        }
-    }["LayoutProvider.useEffect"], [
-        layoutMode,
-        isMobile
-    ]);
+        isMobile,
+        layoutMode
+    ]); // Depend only on isMobile and layoutMode (for comparison)
     const toggleLayout = ()=>{
-        if (!isMobile) {
-            setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        // Only allow toggling if isMobile has been determined and it's not mobile
+        if (isMobile !== null && !isMobile) {
+            setLayoutMode((prev)=>{
+                const newMode = prev === "standard" ? "sidebar" : "standard";
+                localStorage.setItem("layoutMode", newMode);
+                return newMode;
+            });
         }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LayoutContext.Provider, {
@@ -134,11 +160,11 @@ function LayoutProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/layout-context.tsx",
-        lineNumber: 54,
+        lineNumber: 89,
         columnNumber: 5
     }, this);
 }
-_s(LayoutProvider, "iYKeiqB6ByLLZ+E7uVm4M2sjyzU=");
+_s(LayoutProvider, "z9lZoxo8TonM4Wpq1hYphWzQL58=");
 _c = LayoutProvider;
 function useLayout() {
     _s1();

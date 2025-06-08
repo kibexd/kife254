@@ -79,9 +79,7 @@
 
 /* Sidebar layout adjustments */
 .sidebar-content {
-  /* margin-left: 16rem; 256px - width of sidebar */
-
-  /* All margin and width removed. Layout handled by PageContainer.tsx */
+  margin-left: 16rem; /* 256px - width of sidebar */
 }
 
 @media (max-width: 768px) {

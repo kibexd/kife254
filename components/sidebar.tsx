@@ -46,6 +46,8 @@ export function Sidebar() {
   const [showMusicPlayer, setShowMusicPlayer] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  console.log("Sidebar layoutMode:", layoutMode);
+
   const routes = [
     { href: "/", label: "Home", icon: Home },
     { href: "/about", label: "About", icon: User },

@@ -73,39 +73,67 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 ;
 ;
 const LayoutContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createContext"])(undefined);
+// Debounce utility function
+const debounce = (func, delay)=>{
+    let timeout;
+    return (...args)=>{
+        clearTimeout(timeout);
+        timeout = setTimeout(()=>func(...args), delay);
+    };
+};
 function LayoutProvider({ children }) {
+    // Initialize layoutMode to a server-safe default. It will be updated client-side.
     const [layoutMode, setLayoutMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("standard");
     const [isTransitioning, setIsTransitioning] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(null); // null means not determined yet
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        const handleResize = ()=>{
-            setIsMobile(window.innerWidth < 768);
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return ()=>window.removeEventListener("resize", handleResize);
-    }, []);
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        // This effect runs only on the client after initial render
+        const initialIsMobile = window.innerWidth < 768;
+        setIsMobile(initialIsMobile);
         const savedLayout = localStorage.getItem("layoutMode");
-        if (isMobile) {
-            setLayoutMode("standard");
-        } else if (savedLayout) {
-            setLayoutMode(savedLayout);
+        let initialLayout;
+        if (initialIsMobile) {
+            initialLayout = "standard";
+        } else {
+            initialLayout = savedLayout || "sidebar"; // Default to sidebar if desktop and no saved preference
         }
-    }, [
-        isMobile
-    ]);
+        setLayoutMode(initialLayout);
+        const handleResize = ()=>{
+            const currentIsMobile = window.innerWidth < 768;
+            if (isMobile !== currentIsMobile) {
+                setIsMobile(currentIsMobile);
+            }
+        };
+        const debouncedHandleResize = debounce(handleResize, 100);
+        window.addEventListener("resize", debouncedHandleResize);
+        return ()=>window.removeEventListener("resize", debouncedHandleResize);
+    }, []); // Run only once on mount
+    // Effect to update layoutMode when isMobile changes (after initial setup)
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        if (!isMobile) {
-            localStorage.setItem("layoutMode", layoutMode);
+        // Only proceed if isMobile has been determined
+        if (isMobile === null) return;
+        let desiredLayout;
+        if (isMobile) {
+            desiredLayout = "standard";
+        } else {
+            const savedLayout = localStorage.getItem("layoutMode");
+            desiredLayout = savedLayout || "sidebar";
+        }
+        if (layoutMode !== desiredLayout) {
+            setLayoutMode(desiredLayout);
         }
     }, [
-        layoutMode,
-        isMobile
-    ]);
+        isMobile,
+        layoutMode
+    ]); // Depend only on isMobile and layoutMode (for comparison)
     const toggleLayout = ()=>{
-        if (!isMobile) {
-            setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        // Only allow toggling if isMobile has been determined and it's not mobile
+        if (isMobile !== null && !isMobile) {
+            setLayoutMode((prev)=>{
+                const newMode = prev === "standard" ? "sidebar" : "standard";
+                localStorage.setItem("layoutMode", newMode);
+                return newMode;
+            });
         }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(LayoutContext.Provider, {
@@ -117,7 +145,7 @@ function LayoutProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/layout-context.tsx",
-        lineNumber: 54,
+        lineNumber: 89,
         columnNumber: 5
     }, this);
 }
