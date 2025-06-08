@@ -2,7 +2,7 @@
 
 import { PageContainer } from "@/components/page-container"
 import { Button } from "@/components/ui/button"
-import { Github, Linkedin, Twitter, Download, ArrowRight } from "lucide-react"
+import { Github, Linkedin, X, Download, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { QuoteDisplay } from "@/components/quote-display"
@@ -67,8 +67,8 @@ export default function Home() {
                 <span className="sr-only">GitHub</span>
               </Link>
               <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
+                <X className="h-5 w-5" />
+                <span className="sr-only">X</span>
               </Link>
               <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
                 <Linkedin className="h-5 w-5" />

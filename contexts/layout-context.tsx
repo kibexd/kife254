@@ -4,11 +4,16 @@ import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 
 type LayoutMode = "standard" | "sidebar"
+type SidebarSide = "left" | "right"
 
 interface LayoutContextType {
   layoutMode: LayoutMode
   toggleLayout: () => void
   isTransitioning: boolean
+  sidebarSide: SidebarSide
+  toggleSidebarSide: () => void
+  isIlluminated: boolean
+  toggleIllumination: () => void
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined)
@@ -27,6 +32,8 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("standard");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isMobile, setIsMobile] = useState<boolean | null>(null); // null means not determined yet
+  const [sidebarSide, setSidebarSide] = useState<SidebarSide>("left");
+  const [isIlluminated, setIsIlluminated] = useState(false);
 
   useEffect(() => {
     // This effect runs only on the client after initial render
@@ -34,6 +41,9 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     setIsMobile(initialIsMobile);
 
     const savedLayout = localStorage.getItem("layoutMode") as LayoutMode | null;
+    const savedSidebarSide = localStorage.getItem("sidebarSide") as SidebarSide | null;
+    const savedIllumination = localStorage.getItem("isIlluminated") === "true";
+
     let initialLayout: LayoutMode;
 
     if (initialIsMobile) {
@@ -42,6 +52,8 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
       initialLayout = savedLayout || "sidebar"; // Default to sidebar if desktop and no saved preference
     }
     setLayoutMode(initialLayout);
+    setSidebarSide(savedSidebarSide || "left"); // Default to left
+    setIsIlluminated(savedIllumination);
 
     const handleResize = () => {
       const currentIsMobile = window.innerWidth < 768;
@@ -85,8 +97,36 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const toggleSidebarSide = () => {
+    if (isMobile !== null && !isMobile) {
+      setSidebarSide((prev) => {
+        const newSide = prev === "left" ? "right" : "left";
+        localStorage.setItem("sidebarSide", newSide);
+        return newSide;
+      });
+    }
+  };
+
+  const toggleIllumination = () => {
+    setIsIlluminated((prev) => {
+      const newState = !prev;
+      localStorage.setItem("isIlluminated", String(newState));
+      return newState;
+    });
+  };
+
   return (
-    <LayoutContext.Provider value={{ layoutMode, toggleLayout, isTransitioning }}>{children}</LayoutContext.Provider>
+    <LayoutContext.Provider value={{
+      layoutMode,
+      toggleLayout,
+      isTransitioning,
+      sidebarSide,
+      toggleSidebarSide,
+      isIlluminated,
+      toggleIllumination
+    }}>
+      {children}
+    </LayoutContext.Provider>
   );
 }
 

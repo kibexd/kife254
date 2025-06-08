@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Linkedin, Twitter } from "lucide-react"
+import { Github, Linkedin, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FooterProps {
@@ -24,7 +24,7 @@ export function Footer({ className }: FooterProps) {
               rel="noopener noreferrer" 
               className="text-muted-foreground hover:text-foreground transition-colors icon-hover"
             >
-              <Twitter className="h-4 w-4" />
+              <X className="h-4 w-4" />
               <span className="sr-only">Twitter</span>
             </Link>
             <Link 

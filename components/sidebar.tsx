@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils"
 import {
   Github,
   Linkedin,
-  Twitter,
   Download,
   Home,
   User,
@@ -23,6 +22,9 @@ import {
   Volume2,
   VolumeX,
   X,
+  PanelLeft,
+  PanelRight,
+  Zap,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -36,7 +38,7 @@ import { Slider } from "@/components/ui/slider"
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { toggleLayout, layoutMode } = useLayout()
+  const { toggleLayout, layoutMode, sidebarSide, toggleSidebarSide, isIlluminated, toggleIllumination } = useLayout()
   const [showCVPreview, setShowCVPreview] = useState(false)
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -147,7 +149,10 @@ export function Sidebar() {
   }
 
   return (
-    <div className="h-screen w-64 border-r flex flex-col bg-card fixed left-0 top-0 z-40">
+    <div className={cn(
+      "h-screen w-64 border-r flex flex-col bg-card fixed top-0 z-40",
+      sidebarSide === "left" ? "left-0 border-r" : "right-0 border-l",
+    )}>
       <div className="p-6 flex flex-col items-center">
         <div
           className="relative w-32 h-32 overflow-hidden rounded-2xl mb-4 profile-image-container"
@@ -197,7 +202,7 @@ export function Sidebar() {
             <span className="sr-only">GitHub</span>
           </Link>
           <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-            <Twitter className="h-4 w-4" />
+            <X className="h-4 w-4" />
             <span className="sr-only">Twitter</span>
           </Link>
           <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
@@ -232,6 +237,42 @@ export function Sidebar() {
               </TooltipTrigger>
               <TooltipContent>
                 <p>Play some beats</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleSidebarSide}
+                  className="h-8 w-8 transition-transform hover:scale-105 active:scale-95 icon-hover"
+                >
+                  {sidebarSide === "left" ? <PanelRight className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                  <span className="sr-only">Toggle sidebar side</span>
+                </Button> */}
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle sidebar side</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={toggleIllumination}
+                  className="h-8 w-8 transition-transform hover:scale-105 active:scale-95 icon-hover"
+                >
+                  <Zap className="h-4 w-4" />
+                  <span className="sr-only">Toggle border illumination</span>
+                </Button> */}
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle border illumination</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

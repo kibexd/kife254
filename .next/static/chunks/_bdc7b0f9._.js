@@ -93,12 +93,16 @@ function LayoutProvider({ children }) {
     const [layoutMode, setLayoutMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("standard");
     const [isTransitioning, setIsTransitioning] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null); // null means not determined yet
+    const [sidebarSide, setSidebarSide] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("left");
+    const [isIlluminated, setIsIlluminated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "LayoutProvider.useEffect": ()=>{
             // This effect runs only on the client after initial render
             const initialIsMobile = window.innerWidth < 768;
             setIsMobile(initialIsMobile);
             const savedLayout = localStorage.getItem("layoutMode");
+            const savedSidebarSide = localStorage.getItem("sidebarSide");
+            const savedIllumination = localStorage.getItem("isIlluminated") === "true";
             let initialLayout;
             if (initialIsMobile) {
                 initialLayout = "standard";
@@ -106,6 +110,8 @@ function LayoutProvider({ children }) {
                 initialLayout = savedLayout || "sidebar"; // Default to sidebar if desktop and no saved preference
             }
             setLayoutMode(initialLayout);
+            setSidebarSide(savedSidebarSide || "left"); // Default to left
+            setIsIlluminated(savedIllumination);
             const handleResize = {
                 "LayoutProvider.useEffect.handleResize": ()=>{
                     const currentIsMobile = window.innerWidth < 768;
@@ -151,20 +157,40 @@ function LayoutProvider({ children }) {
             });
         }
     };
+    const toggleSidebarSide = ()=>{
+        if (isMobile !== null && !isMobile) {
+            setSidebarSide((prev)=>{
+                const newSide = prev === "left" ? "right" : "left";
+                localStorage.setItem("sidebarSide", newSide);
+                return newSide;
+            });
+        }
+    };
+    const toggleIllumination = ()=>{
+        setIsIlluminated((prev)=>{
+            const newState = !prev;
+            localStorage.setItem("isIlluminated", String(newState));
+            return newState;
+        });
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LayoutContext.Provider, {
         value: {
             layoutMode,
             toggleLayout,
-            isTransitioning
+            isTransitioning,
+            sidebarSide,
+            toggleSidebarSide,
+            isIlluminated,
+            toggleIllumination
         },
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/layout-context.tsx",
-        lineNumber: 89,
+        lineNumber: 119,
         columnNumber: 5
     }, this);
 }
-_s(LayoutProvider, "z9lZoxo8TonM4Wpq1hYphWzQL58=");
+_s(LayoutProvider, "0EBgWrwrNYrJtn+SEo1uelXUSow=");
 _c = LayoutProvider;
 function useLayout() {
     _s1();

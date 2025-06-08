@@ -8,7 +8,7 @@ import {
   Download,
   Github,
   Linkedin,
-  Twitter,
+  X,
   Star,
   Award,
   Briefcase,
@@ -723,7 +723,7 @@ export default function AboutPage() {
                   <span className="sr-only">GitHub</span>
                 </Link>
                 <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-                  <Twitter className="h-5 w-5" />
+                  <X className="h-5 w-5" />
                   <span className="sr-only">Twitter</span>
                 </Link>
                 <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">

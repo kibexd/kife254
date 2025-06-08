@@ -773,6 +773,10 @@ body {
   margin-left: .5rem;
 }
 
+.ml-64 {
+  margin-left: 16rem;
+}
+
 .ml-auto {
   margin-left: auto;
 }
@@ -787,6 +791,10 @@ body {
 
 .mr-3 {
   margin-right: .75rem;
+}
+
+.mr-64 {
+  margin-right: 16rem;
 }
 
 .mt-0 {
@@ -3167,6 +3175,31 @@ body {
 
 .music-player-volume:hover {
   transform: scaleY(1.2);
+}
+
+html.light {
+  --illumination-glow-color: 0, 0, 0;
+}
+
+html.dark {
+  --illumination-glow-color: 255, 255, 255;
+}
+
+[data-illumination="on"] .border, [data-illumination="on"] .card, [data-illumination="on"] .profile-image-container, [data-illumination="on"] .glow-effect, [data-illumination="on"] .apple-button, [data-illumination="on"] .sidebar-content, [data-illumination="on"] footer, [data-illumination="on"] nav, [data-illumination="on"] .fixed {
+  position: relative;
+  z-index: 1;
+  transition: box-shadow .3s ease-in-out, border-color .3s ease-in-out;
+  box-shadow: 0 0 15px rgba(var(--illumination-glow-color), .6), 0 0 30px rgba(var(--illumination-glow-color), .3);
+  border-color: rgba(var(--illumination-glow-color), .5) !important;
+}
+
+[data-illumination="on"] .border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+[data-illumination="on"] .apple-button, [data-illumination="on"] .icon-hover {
+  box-shadow: 0 0 10px rgba(var(--illumination-glow-color), .7), 0 0 20px rgba(var(--illumination-glow-color), .4);
 }
 
 .file\:border-0::file-selector-button {

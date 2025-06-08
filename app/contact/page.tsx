@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { Github, Linkedin, Mail, MapPin, Phone, Twitter, Send, CheckCircle } from "lucide-react"
+import { Github, Linkedin, Mail, MapPin, Phone, X, Send, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { useState, type FormEvent } from "react"
 import { cn } from "@/lib/utils"
@@ -138,7 +138,7 @@ export default function ContactPage() {
             <span className="sr-only">GitHub</span>
           </Link>
           <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-            <Twitter className="h-4 w-4" />
+            <X className="h-4 w-4" />
             <span className="sr-only">Twitter</span>
           </Link>
           <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">

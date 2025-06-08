@@ -695,3 +695,49 @@
 .music-player-volume:hover {
   transform: scaleY(1.2);
 }
+
+/* Define CSS variables for illumination color based on theme */
+html.light {
+  --illumination-glow-color: 0, 0, 0; /* Black for light mode contrast */
+}
+
+html.dark {
+  --illumination-glow-color: 255, 255, 255; /* Bright white for dark mode glow */
+}
+
+/* Apply illumination styles to relevant components when data-illumination="on" */
+[data-illumination="on"] .border,
+[data-illumination="on"] .card,
+[data-illumination="on"] .profile-image-container,
+[data-illumination="on"] .glow-effect,
+[data-illumination="on"] .apple-button,
+[data-illumination="on"] .sidebar-content,
+[data-illumination="on"] footer, /* Targets the footer element */
+[data-illumination="on"] nav, /* Targets the navbar (assuming it's a <nav> or has a 'nav' class) */
+[data-illumination="on"] .fixed { /* Targets the fixed sidebar */
+  position: relative; /* Ensure box-shadow renders correctly */
+  z-index: 1; /* Helps bring illuminated elements slightly forward */
+  transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out; /* Smooth transition for effect */
+  
+  /* Apply box-shadow for the glow effect */
+  box-shadow: 
+    0 0 15px rgba(var(--illumination-glow-color), 0.6),
+    0 0 30px rgba(var(--illumination-glow-color), 0.3);
+  
+  /* Slightly adjust border color to match the glow, if a border exists */
+  border-color: rgba(var(--illumination-glow-color), 0.5) !important;
+}
+
+/* Ensure elements with the 'border' class explicitly have a border for the effect */
+[data-illumination="on"] .border {
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Further enhance the glow for specific interactive elements */
+[data-illumination="on"] .apple-button,
+[data-illumination="on"] .icon-hover {
+  box-shadow: 
+    0 0 10px rgba(var(--illumination-glow-color), 0.7),
+    0 0 20px rgba(var(--illumination-glow-color), 0.4);
+}
