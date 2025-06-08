@@ -83,26 +83,47 @@ function LayoutProvider({ children }) {
     _s();
     const [layoutMode, setLayoutMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("standard");
     const [isTransitioning, setIsTransitioning] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Load preference from localStorage on mount
+    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "LayoutProvider.useEffect": ()=>{
+            const handleResize = {
+                "LayoutProvider.useEffect.handleResize": ()=>{
+                    setIsMobile(window.innerWidth < 768);
+                }
+            }["LayoutProvider.useEffect.handleResize"];
+            handleResize();
+            window.addEventListener("resize", handleResize);
+            return ({
+                "LayoutProvider.useEffect": ()=>window.removeEventListener("resize", handleResize)
+            })["LayoutProvider.useEffect"];
+        }
+    }["LayoutProvider.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "LayoutProvider.useEffect": ()=>{
             const savedLayout = localStorage.getItem("layoutMode");
-            if (savedLayout) {
+            if (isMobile) {
+                setLayoutMode("standard");
+            } else if (savedLayout) {
                 setLayoutMode(savedLayout);
             }
         }
-    }["LayoutProvider.useEffect"], []);
-    // Save preference to localStorage when it changes
+    }["LayoutProvider.useEffect"], [
+        isMobile
+    ]);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "LayoutProvider.useEffect": ()=>{
-            localStorage.setItem("layoutMode", layoutMode);
+            if (!isMobile) {
+                localStorage.setItem("layoutMode", layoutMode);
+            }
         }
     }["LayoutProvider.useEffect"], [
-        layoutMode
+        layoutMode,
+        isMobile
     ]);
     const toggleLayout = ()=>{
-        // Simple toggle without animation to avoid issues
-        setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        if (!isMobile) {
+            setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LayoutContext.Provider, {
         value: {
@@ -113,11 +134,11 @@ function LayoutProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/layout-context.tsx",
-        lineNumber: 39,
+        lineNumber: 54,
         columnNumber: 5
     }, this);
 }
-_s(LayoutProvider, "aWjT2324SbZbnbjkCbHIQVXljfE=");
+_s(LayoutProvider, "iYKeiqB6ByLLZ+E7uVm4M2sjyzU=");
 _c = LayoutProvider;
 function useLayout() {
     _s1();

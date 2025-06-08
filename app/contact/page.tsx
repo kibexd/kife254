@@ -13,7 +13,8 @@ import { useState, type FormEvent } from "react"
 import { cn } from "@/lib/utils"
 
 export default function ContactPage() {
-  const [formState, setFormState] = useState<"idle" | "sending" | "sent">("idle")
+  const [formState, setFormState] = useState<"idle" | "sending" | "sent" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState<string>("")
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,35 +23,13 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    setErrorMessage("")
 
     if (!formData.name || !formData.email || !formData.message) {
       return
     }
 
     setFormState("sending")
-
-    // Simulate sending email for preview
-    setTimeout(() => {
-      console.log("Email sent to kibeenock7390@gmail.com", formData)
-      setFormState("sent")
-
-      // Reset form after a delay
-      setTimeout(() => {
-        setFormState("idle")
-        setFormData({
-          name: "",
-          email: "",
-          message: "",
-        })
-      }, 5000)
-    }, 2000)
-
-    /* 
-    // ACTUAL EMAIL FUNCTIONALITY (COMMENTED OUT FOR LOCAL IMPLEMENTATION)
-    // To implement this locally:
-    // 1. Install nodemailer: npm install nodemailer
-    // 2. Create a server action in app/actions/send-email.ts
-    // 3. Uncomment and use this code:
 
     try {
       const response = await fetch('/api/send-email', {
@@ -62,11 +41,12 @@ export default function ContactPage() {
           name: formData.name,
           email: formData.email,
           message: formData.message,
-          to: "kibeenock2024@yahoo.com"
         }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setFormState("sent");
         // Reset form after success
         setTimeout(() => {
@@ -79,14 +59,15 @@ export default function ContactPage() {
         }, 5000);
       } else {
         // Handle error
-        console.error("Failed to send email");
-        setFormState("idle");
+        console.error("Failed to send email:", data.error, data.details);
+        setErrorMessage(data.details || data.error || "Failed to send message. Please try again later.");
+        setFormState("error");
       }
     } catch (error) {
       console.error("Error sending email:", error);
-      setFormState("idle");
+      setErrorMessage("An error occurred while sending your message. Please try again later.");
+      setFormState("error");
     }
-    */
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -152,18 +133,18 @@ export default function ContactPage() {
                 <div className="mt-8">
                   <h3 className="text-sm font-medium mb-3">Connect with me</h3>
                   <div className="flex gap-4">
-                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-                      <Github className="h-5 w-5" />
-                      <span className="sr-only">GitHub</span>
-                    </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-                      <Twitter className="h-5 w-5" />
-                      <span className="sr-only">Twitter</span>
-                    </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
-                      <Linkedin className="h-5 w-5" />
-                      <span className="sr-only">LinkedIn</span>
-                    </Link>
+                  <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+            <Github className="h-4 w-4" />
+            <span className="sr-only">GitHub</span>
+          </Link>
+          <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+            <Twitter className="h-4 w-4" />
+            <span className="sr-only">Twitter</span>
+          </Link>
+          <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+            <Linkedin className="h-4 w-4" />
+            <span className="sr-only">LinkedIn</span>
+          </Link>
                   </div>
                 </div>
               </CardContent>
@@ -225,6 +206,12 @@ export default function ContactPage() {
                   </label>
                 </div>
 
+                {formState === "error" && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   className={cn(
@@ -242,6 +229,12 @@ export default function ContactPage() {
                   {formState === "sending" && (
                     <>
                       Sending...
+                      <Send className="ml-2 h-4 w-4 send-icon" />
+                    </>
+                  )}
+                  {formState === "error" && (
+                    <>
+                      Try Again
                       <Send className="ml-2 h-4 w-4 send-icon" />
                     </>
                   )}

@@ -16,23 +16,38 @@ const LayoutContext = createContext<LayoutContextType | undefined>(undefined)
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("standard")
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Load preference from localStorage on mount
   useEffect(() => {
-    const savedLayout = localStorage.getItem("layoutMode") as LayoutMode | null
-    if (savedLayout) {
-      setLayoutMode(savedLayout)
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
     }
+
+    handleResize()
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Save preference to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem("layoutMode", layoutMode)
-  }, [layoutMode])
+    const savedLayout = localStorage.getItem("layoutMode") as LayoutMode | null
+    if (isMobile) {
+      setLayoutMode("standard")
+    } else if (savedLayout) {
+      setLayoutMode(savedLayout)
+    }
+  }, [isMobile])
+
+  useEffect(() => {
+    if (!isMobile) {
+      localStorage.setItem("layoutMode", layoutMode)
+    }
+  }, [layoutMode, isMobile])
 
   const toggleLayout = () => {
-    // Simple toggle without animation to avoid issues
-    setLayoutMode((prev) => (prev === "standard" ? "sidebar" : "standard"))
+    if (!isMobile) {
+      setLayoutMode((prev) => (prev === "standard" ? "sidebar" : "standard"))
+    }
   }
 
   return (

@@ -10,19 +10,36 @@ import Image from "next/image"
 import { useEffect, useState, useRef } from "react"
 import { motion, useInView } from "framer-motion"
 
+interface Project {
+  title: string;
+  description: string;
+  image: string;
+  category: string;
+  date: string;
+  status: "completed" | "upcoming";
+  link?: string; // Optional link property
+}
+
+interface CounterProps {
+  value: number; // Assuming value is a number
+  className?: string;
+  delay?: number;
+}
+
 export default function ProjectsPage() {
   const [animateCount, setAnimateCount] = useState(false)
+  const [dateFilter, setDateFilter] = useState<"all" | "recent" | "older">("all")
   const completedCountRef = useRef(null)
   const upcomingCountRef = useRef(null)
-  const isCompletedInView = useInView(completedCountRef, { once: true, threshold: 0.5 })
-  const isUpcomingInView = useInView(upcomingCountRef, { once: true, threshold: 0.5 })
+  const isCompletedInView = useInView(completedCountRef, { once: true })
+  const isUpcomingInView = useInView(upcomingCountRef, { once: true })
 
   useEffect(() => {
     // Trigger animation after component mounts
     setAnimateCount(true)
   }, [])
 
-  const completedProjects = [
+  const completedProjects: Project[] = [
     {
       title: "Voting System for Tea Planters Association",
       description: "Decentralized voting system for secure and transparent elections.",
@@ -70,7 +87,7 @@ export default function ProjectsPage() {
     },
   ]
 
-  const upcomingProjects = [
+  const upcomingProjects: Project[] = [
     {
       title: "Kibe & Associates Website",
       description: "Professional website for a consultancy firm with service listings and contact forms.",
@@ -83,24 +100,42 @@ export default function ProjectsPage() {
     {
       title: "Workers Rights Watch",
       description: "Web application for monitoring and reporting workers' rights violations.",
-      image: "/wrw.jpg?height=300&width=500",
+      image: "/wrw1.jpg?height=300&width=500",
       category: "Mobile Development",
       date: "Expected: June 2025",
       status: "upcoming",
-      //link: "#",
+      link: "https://workers-rights-watch-website.vercel.app",
     },
   ]
 
   const allProjects = [...completedProjects, ...upcomingProjects]
 
+  const filterProjectsByDate = (projects: Project[]) => {
+    const currentDate = new Date()
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+
+    return projects.filter(project => {
+      const projectDate = new Date(project.date)
+      if (dateFilter === "recent") {
+        return projectDate >= sixMonthsAgo
+      } else if (dateFilter === "older") {
+        return projectDate < sixMonthsAgo
+      }
+      return true
+    })
+  }
+
+  const filteredProjects = filterProjectsByDate(allProjects)
+
   // Terminal-style counter animation
-  const Counter = ({ value, className = "", delay = 0 }) => {
+  const Counter = ({ value, className = "", delay = 0 }: CounterProps) => {
     const [count, setCount] = useState(0)
 
     useEffect(() => {
       if (animateCount) {
         let start = 0
-        const end = Number.parseInt(value)
+        const end = value // Directly use value as it's already typed as number
         const duration = 2000
         const increment = end / (duration / 30) // Update every 30ms
 
@@ -181,7 +216,7 @@ export default function ProjectsPage() {
           </div>
 
           <Tabs defaultValue="all" className="fade-in" style={{ animationDelay: "0.3s" }}>
-            <div className="flex justify-center mb-8 overflow-x-auto pb-2">
+            <div className="flex justify-between items-center mb-8 overflow-x-auto pb-2">
               <TabsList>
                 <TabsTrigger value="all">All Projects</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -189,11 +224,40 @@ export default function ProjectsPage() {
                 <TabsTrigger value="web">Web Development</TabsTrigger>
                 <TabsTrigger value="erp">ERP Systems</TabsTrigger>
               </TabsList>
+              
+              <div className="flex gap-2">
+                <Button
+                  variant={dateFilter === "recent" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDateFilter(dateFilter === "recent" ? "all" : "recent")}
+                  className="rounded-full transition-all duration-300 hover:scale-105"
+                >
+                  Recent Projects
+                </Button>
+                <Button
+                  variant={dateFilter === "older" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setDateFilter(dateFilter === "older" ? "all" : "older")}
+                  className="rounded-full transition-all duration-300 hover:scale-105"
+                >
+                  Older Projects
+                </Button>
+                {dateFilter !== "all" && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDateFilter("all")}
+                    className="rounded-full transition-all duration-300 hover:scale-105"
+                  >
+                    Clear Filter
+                  </Button>
+                )}
+              </div>
             </div>
 
             <TabsContent value="all" className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {allProjects.map((project, index) => (
+                {filteredProjects.map((project, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}

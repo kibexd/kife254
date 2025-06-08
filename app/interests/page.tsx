@@ -288,7 +288,7 @@ export default function InterestsPage() {
 
   const [selectedVideo, setSelectedVideo] = useState<any>(null)
 
-  const filterArticles = (category) => {
+  const filterArticles = (category: string) => {
     if (category === "all") return articles
     return articles.filter((article) => article.category === category)
   }
@@ -598,7 +598,7 @@ export default function InterestsPage() {
         <ImageGallery
           isOpen={!!selectedImage}
           onClose={() => setSelectedImage(null)}
-          images={selectedImage.gallery.map((img, i) => ({
+          images={selectedImage.gallery.map((img: string, i: number) => ({
             src: img,
             alt: `${selectedImage.title} - Image ${i + 1}`,
           }))}

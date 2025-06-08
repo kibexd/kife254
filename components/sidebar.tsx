@@ -36,7 +36,7 @@ import { Slider } from "@/components/ui/slider"
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { toggleLayout } = useLayout()
+  const { toggleLayout, layoutMode } = useLayout()
   const [showCVPreview, setShowCVPreview] = useState(false)
   const [isImageHovered, setIsImageHovered] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -140,6 +140,10 @@ export function Sidebar() {
     setVolume(value[0])
   }
 
+  if (layoutMode === "standard") {
+    return null // Do not render sidebar in standard layout
+  }
+
   return (
     <div className="h-screen w-64 border-r flex flex-col bg-card fixed left-0 top-0 z-40">
       <div className="p-6 flex flex-col items-center">
@@ -174,7 +178,7 @@ export function Sidebar() {
                 className="absolute inset-0"
               >
                 <img
-                  src="/dp2.jpg"
+                  src="/kife2.png"
                   alt="Enock Kibe"
                   className="w-full h-full object-cover profile-image"
                 />
@@ -186,15 +190,15 @@ export function Sidebar() {
         <p className="text-xs text-muted-foreground">Full Stack Developer</p>
 
         <div className="flex gap-3 mt-3">
-          <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+          <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
             <Github className="h-4 w-4" />
             <span className="sr-only">GitHub</span>
           </Link>
-          <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+          <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
             <Twitter className="h-4 w-4" />
             <span className="sr-only">Twitter</span>
           </Link>
-          <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+          <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
             <Linkedin className="h-4 w-4" />
             <span className="sr-only">LinkedIn</span>
           </Link>

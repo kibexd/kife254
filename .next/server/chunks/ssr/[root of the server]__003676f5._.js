@@ -76,22 +76,37 @@ const LayoutContext = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$proje
 function LayoutProvider({ children }) {
     const [layoutMode, setLayoutMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("standard");
     const [isTransitioning, setIsTransitioning] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
-    // Load preference from localStorage on mount
+    const [isMobile, setIsMobile] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const handleResize = ()=>{
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return ()=>window.removeEventListener("resize", handleResize);
+    }, []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
         const savedLayout = localStorage.getItem("layoutMode");
-        if (savedLayout) {
+        if (isMobile) {
+            setLayoutMode("standard");
+        } else if (savedLayout) {
             setLayoutMode(savedLayout);
         }
-    }, []);
-    // Save preference to localStorage when it changes
-    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
-        localStorage.setItem("layoutMode", layoutMode);
     }, [
-        layoutMode
+        isMobile
+    ]);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        if (!isMobile) {
+            localStorage.setItem("layoutMode", layoutMode);
+        }
+    }, [
+        layoutMode,
+        isMobile
     ]);
     const toggleLayout = ()=>{
-        // Simple toggle without animation to avoid issues
-        setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        if (!isMobile) {
+            setLayoutMode((prev)=>prev === "standard" ? "sidebar" : "standard");
+        }
     };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(LayoutContext.Provider, {
         value: {
@@ -102,7 +117,7 @@ function LayoutProvider({ children }) {
         children: children
     }, void 0, false, {
         fileName: "[project]/contexts/layout-context.tsx",
-        lineNumber: 39,
+        lineNumber: 54,
         columnNumber: 5
     }, this);
 }

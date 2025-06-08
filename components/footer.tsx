@@ -9,15 +9,15 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} Enock Kibe. All Rights Reserved.</p>
 
           <div className="flex gap-4">
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Twitter className="h-4 w-4" />
               <span className="sr-only">Twitter</span>
             </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Github className="h-4 w-4" />
               <span className="sr-only">GitHub</span>
             </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
               <Linkedin className="h-4 w-4" />
               <span className="sr-only">LinkedIn</span>
             </Link>

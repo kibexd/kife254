@@ -28,6 +28,74 @@ import { useEffect, useState, useRef } from "react"
 import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
 import { CVPreview } from "@/components/cv-preview"
 
+// Interfaces defined at the top of the file
+interface EducationItem {
+  school: string
+  years: string
+  location: string
+  degree: string
+  description: string
+  achievements: string[]
+  website?: string
+}
+
+interface ExperienceItem {
+  position: string
+  company: string
+  years: string
+  location?: string
+  website?: string
+  description: string[]
+  technologies?: string[]
+  projects?: { name: string; url: string }[]
+}
+
+interface TechnicalSkill {
+  category: string
+  icon: React.ReactElement
+  skills: string[]
+}
+
+interface CareerAspiration {
+  title: string
+  icon: React.ReactElement
+}
+
+interface ProjectSource {
+  title: string
+  projects?: { name: string; url: string }[]
+  description?: string
+  services?: string[]
+}
+
+interface SkillBarProps {
+  skill: { name: string; level: number }
+  index: number
+}
+
+interface TimelineItemProps {
+  item: EducationItem | ExperienceItem
+  index: number
+  type: "education" | "experience"
+}
+
+interface SkillCategoryProps {
+  category: string
+  icon: React.ReactElement
+  skills: string[]
+  index: number
+}
+
+interface ProjectSourceProps {
+  source: ProjectSource
+  index: number
+}
+
+interface CareerAspirationProps {
+  aspiration: CareerAspiration
+  index: number
+}
+
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState("education")
   const controls = useAnimation()
@@ -89,7 +157,7 @@ export default function AboutPage() {
     */
   ]
 
-  const experienceItems = [
+  const experienceItems: ExperienceItem[] = [
     {
       position: "Software Developer",
       company: "Coretec Solutions Africa",
@@ -125,10 +193,22 @@ export default function AboutPage() {
         "Provided ongoing maintenance and support for client websites",
       ],
       projects: [
-        "Umithio Consultancy Website (https://umithio.netlify.app/)",
-        "Ivy's Website (https://ivyy.netlify.app/)",
-        "Decentralized Voting System (Work in Progress) (https://decentralizedvotingsystem.netlify.app/)",
-        "Personal Portfolio Website (https://kifee.netlify.app/)",
+        {
+          name: "Umithio Consultancy Website",
+          url: "https://umithio.netlify.app/",
+        },
+        {
+          name: "Ivy's Website",
+          url: "https://ivyy.netlify.app/",
+        },
+        {
+          name: "Decentralized Voting System (Work in Progress)",
+          url: "https://decentralizedvotingsystem.netlify.app/",
+        },
+        {
+          name: "Personal Portfolio Website",
+          url: "https://kifee.netlify.app/",
+        },
       ],
     },
     // Commented out for future use
@@ -270,7 +350,7 @@ export default function AboutPage() {
     },
   ]
 
-  const SkillBar = ({ skill, index }) => {
+  const SkillBar = ({ skill, index }: SkillBarProps) => {
     const barRef = useRef(null)
     const isInView = useInView(barRef, { once: false })
 
@@ -301,7 +381,7 @@ export default function AboutPage() {
             transition={{ duration: 1, delay: index * 0.1 }}
           />
           <div className="skill-dots absolute top-0 left-0 h-full w-full flex items-center">
-            {[...Array(10)].map((_, i) => (
+            {[...Array(10)].map((_, i: number) => (
               <div
                 key={i}
                 className={`skill-dot h-1.5 w-1.5 rounded-full bg-white/50 absolute`}
@@ -337,7 +417,7 @@ export default function AboutPage() {
     )
   }
 
-  const TimelineItem = ({ item, index, type }) => {
+  const TimelineItem = ({ item, index, type }: TimelineItemProps) => {
     const itemRef = useRef(null)
     const isInView = useInView(itemRef, { once: false })
 
@@ -370,7 +450,9 @@ export default function AboutPage() {
           <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-3">
             <div>
               <h3 className="font-semibold text-lg">
-                {type === "education" ? item.school : `${item.position} at ${item.company}`}
+                {type === "education"
+                  ? (item as EducationItem).school
+                  : `${(item as ExperienceItem).position} at ${(item as ExperienceItem).company}`}
               </h3>
               <p className="text-sm text-primary font-medium">{item.years}</p>
               {item.location && <p className="text-sm text-muted-foreground">{item.location}</p>}
@@ -386,7 +468,7 @@ export default function AboutPage() {
               )}
             </div>
             <div className="inline-flex px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {type === "education" ? item.degree : item.position}
+              {type === "education" ? (item as EducationItem).degree : (item as ExperienceItem).position}
             </div>
           </div>
 
@@ -400,26 +482,42 @@ export default function AboutPage() {
               {type === "education" ? "Key Achievements" : "Responsibilities & Projects"}
             </h4>
             <ul className="space-y-2">
-              {(type === "education"
-                ? item.achievements
-                : item.projects || item.technologies || item.description.slice(1)
-              ).map((detail, i) => (
-                <motion.li
-                  key={i}
-                  className="fancy-list-item flex items-start gap-3"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3, delay: 0.5 + i * 0.1 }}
-                >
-                  <div className="relative">
-                    <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-primary rounded-full animate-ping opacity-75"></div>
-                    <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
+              {(() => {
+                const detailsToMap: string[] = (() => {
+                  if (type === "education") {
+                    return (item as EducationItem).achievements;
+                  } else {
+                    const expItem = item as ExperienceItem;
+                    if (Array.isArray(expItem.projects)) {
+                      const projectsArray = expItem.projects;
+                      return projectsArray.map(p => p.name);
+                    } else if (Array.isArray(expItem.technologies)) {
+                      return expItem.technologies;
+                    } else if (Array.isArray(expItem.description)) {
+                      return expItem.description.slice(1);
+                    } else {
+                      return []; // Fallback to empty array
+                    }
+                  }
+                })();
+                return detailsToMap.map((detail: string, i: number) => (
+                  <motion.li
+                    key={i}
+                    className="fancy-list-item flex items-start gap-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3, delay: 0.5 + i * 0.1 }}
+                  >
+                    <div className="relative">
+                      <div className="absolute top-1.5 left-1.5 w-2 h-2 bg-primary rounded-full animate-ping opacity-75"></div>
+                      <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-sm">{detail}</span>
-                </motion.li>
-              ))}
+                    <span className="text-sm">{detail}</span>
+                  </motion.li>
+                ));
+              })()}
             </ul>
           </div>
         </div>
@@ -427,9 +525,9 @@ export default function AboutPage() {
     )
   }
 
-  const SkillCategory = ({ category, icon, skills, index }) => {
+  const SkillCategory = ({ category, icon, skills, index }: SkillCategoryProps) => {
     const categoryRef = useRef(null)
-    const isInView = useInView(categoryRef, { once: false, threshold: 0.1 })
+    const isInView = useInView(categoryRef, { once: false })
 
     return (
       <motion.div
@@ -444,7 +542,7 @@ export default function AboutPage() {
           <h3 className="font-semibold text-lg">{category}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-10">
-          {skills.map((skill, i) => (
+          {skills.map((skill: string, i: number) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -20 }}
@@ -461,9 +559,9 @@ export default function AboutPage() {
     )
   }
 
-  const ProjectSource = ({ source, index }) => {
+  const ProjectSource = ({ source, index }: ProjectSourceProps) => {
     const sourceRef = useRef(null)
-    const isInView = useInView(sourceRef, { once: false, threshold: 0.1 })
+    const isInView = useInView(sourceRef, { once: false })
 
     return (
       <motion.div
@@ -476,7 +574,7 @@ export default function AboutPage() {
         <h3 className="font-semibold text-lg mb-2">{source.title}</h3>
         {source.projects && (
           <ul className="space-y-2 mb-2">
-            {source.projects.map((project, i) => (
+            {source.projects.map((project: { name: string; url: string }, i: number) => (
               <motion.li
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
@@ -502,7 +600,7 @@ export default function AboutPage() {
         {source.description && <p className="text-sm text-muted-foreground mb-2">{source.description}</p>}
         {source.services && (
           <ul className="space-y-1 pl-5">
-            {source.services.map((service, i) => (
+            {source.services.map((service: string, i: number) => (
               <motion.li
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
@@ -519,9 +617,9 @@ export default function AboutPage() {
     )
   }
 
-  const CareerAspiration = ({ aspiration, index }) => {
+  const CareerAspiration = ({ aspiration, index }: CareerAspirationProps) => {
     const aspirationRef = useRef(null)
-    const isInView = useInView(aspirationRef, { once: false, threshold: 0.1 })
+    const isInView = useInView(aspirationRef, { once: false })
 
     return (
       <motion.div
@@ -565,7 +663,7 @@ export default function AboutPage() {
                     className="absolute inset-0"
                   >
                     <img
-                      src="/dp.png"
+                      src="/dp3.jpg"
                       alt="Enock Kibe - Coding"
                       className="w-full h-full object-cover profile-image"
                     />
@@ -574,13 +672,13 @@ export default function AboutPage() {
                   <motion.div
                     key="main-image"
                     initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    animate={{ opacity: 2, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3 }}
                     className="absolute inset-0"
                   >
                     <img
-                      src="/dp3.jpg"
+                      src="/kife.jpg"
                       alt="Enock Kibe"
                       className="w-full h-full object-cover profile-image"
                     />

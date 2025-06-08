@@ -62,15 +62,15 @@ export default function Home() {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+              <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
                 <Github className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+              <Link href="https://x.com/kibe_xd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
                 <Twitter className="h-5 w-5" />
                 <span className="sr-only">Twitter</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
+              <Link href="https://www.linkedin.com/in/enockkibe/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
@@ -90,7 +90,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.1 }}
                   className="absolute inset-0"
                 >
                   <img
@@ -105,7 +105,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.1 }}
                   className="absolute inset-0"
                 >
                   <img
@@ -132,18 +132,19 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { title: "Umithio Consultancy Website", image: "/umithio.png" },
-              { title: "Ivy's Website", image: "/ivy2.jpg?height=300&width=400" },
-              { title: "Decentralized Voting System", image: "/votez.png?height=300&width=400" },
+              { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-website.vercel.app" },
+              { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects" },
+              { title: "Ivy's Website", image: "/ivy2.jpg?height=300&width=400", link: "/projects" },
+              { title: "Decentralized Voting System", image: "/votez.png?height=300&width=400", link: "/projects" },
             ].map((project, index) => (
-              <Link href="/projects" key={index} className="group">
+              <Link href={project.link} key={index} className="group">
                 <div className="bg-card rounded-lg overflow-hidden border hover-lift">
                   <div className="aspect-video relative">
                     <Image
                       src={project.image || "/placeholder.svg"}
                       alt={project.title}
                       fill
-                      className="object-cover"
+                      className="object-cover object-top"
                     />
                   </div>
                   <div className="p-4">

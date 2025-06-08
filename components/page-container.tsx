@@ -24,7 +24,7 @@ export function PageContainer({ children, hideFooter = false }: PageContainerPro
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="flex-1 flex flex-col sidebar-content">
-          <main className="flex-1 pt-0 px-6">{children}</main>
+          <main className={`flex-1 pt-0 ${layoutMode === "sidebar" ? "pl-64 pr-6" : "px-6"}`}>{children}</main>
           {shouldRenderFooter && (
             <div className="px-6">
               <Footer />
