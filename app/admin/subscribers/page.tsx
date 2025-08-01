@@ -13,16 +13,22 @@ interface Subscriber {
   subscribedAt: string
   ip?: string
   userAgent?: string
+  status?: 'pending' | 'success' | 'failed'
+  emailSent?: boolean
+  notificationSent?: boolean
+  errorMessage?: string
 }
 
 export default function AdminSubscribersPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
+  const [filteredSubscribers, setFilteredSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [deletingEmail, setDeletingEmail] = useState<string | null>(null)
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'success' | 'failed'>('all')
 
   // Check authentication on mount
   useEffect(() => {
@@ -66,11 +72,32 @@ export default function AdminSubscribersPage() {
     }
   }
 
+  // Filter subscribers based on status
+  useEffect(() => {
+    if (statusFilter === 'all') {
+      setFilteredSubscribers(subscribers)
+    } else {
+      setFilteredSubscribers(subscribers.filter(sub => sub.status === statusFilter))
+    }
+  }, [subscribers, statusFilter])
+
+  // Get counts for each status
+  const getStatusCounts = () => {
+    const total = subscribers.length
+    const pending = subscribers.filter(sub => sub.status === 'pending' || !sub.status).length
+    const success = subscribers.filter(sub => sub.status === 'success').length
+    const failed = subscribers.filter(sub => sub.status === 'failed').length
+    
+    return { total, pending, success, failed }
+  }
+
+  const statusCounts = getStatusCounts()
+
   const exportSubscribers = () => {
     const csvContent = [
-      "Email,Subscribed At,IP Address,User Agent",
-      ...subscribers.map(sub => 
-        `"${sub.email}","${sub.subscribedAt}","${sub.ip || 'N/A'}","${sub.userAgent || 'N/A'}"`
+      "Email,Subscribed At,Status,Email Sent,Notification Sent,Error Message,IP Address,User Agent",
+      ...filteredSubscribers.map(sub => 
+        `"${sub.email}","${sub.subscribedAt}","${sub.status || 'pending'}","${sub.emailSent ? 'Yes' : 'No'}","${sub.notificationSent ? 'Yes' : 'No'}","${sub.errorMessage || 'N/A'}","${sub.ip || 'N/A'}","${sub.userAgent || 'N/A'}"`
       )
     ].join("\\n")
     
@@ -78,7 +105,7 @@ export default function AdminSubscribersPage() {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `newsletter-subscribers-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `newsletter-subscribers-${statusFilter}-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
   }
@@ -179,9 +206,9 @@ export default function AdminSubscribersPage() {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Refresh
               </Button>
-              <Button onClick={exportSubscribers} variant="outline" size="sm" disabled={subscribers.length === 0}>
+              <Button onClick={exportSubscribers} variant="outline" size="sm" disabled={filteredSubscribers.length === 0}>
                 <Download className="mr-2 h-4 w-4" />
-                Export CSV
+                Export CSV ({statusFilter})
               </Button>
               <Button 
                 onClick={() => setShowDeleteAllDialog(true)} 
@@ -195,15 +222,50 @@ export default function AdminSubscribersPage() {
             </div>
           </div>
 
+          {/* Status Filter Buttons */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <Button 
+              onClick={() => setStatusFilter('all')} 
+              variant={statusFilter === 'all' ? 'default' : 'outline'} 
+              size="sm"
+            >
+              All ({statusCounts.total})
+            </Button>
+            <Button 
+              onClick={() => setStatusFilter('success')} 
+              variant={statusFilter === 'success' ? 'default' : 'outline'} 
+              size="sm"
+              className={statusFilter === 'success' ? 'bg-green-600 hover:bg-green-700' : 'text-green-600 border-green-600 hover:bg-green-50'}
+            >
+              ✅ Success ({statusCounts.success})
+            </Button>
+            <Button 
+              onClick={() => setStatusFilter('pending')} 
+              variant={statusFilter === 'pending' ? 'default' : 'outline'} 
+              size="sm"
+              className={statusFilter === 'pending' ? 'bg-yellow-600 hover:bg-yellow-700' : 'text-yellow-600 border-yellow-600 hover:bg-yellow-50'}
+            >
+              ⏳ Pending ({statusCounts.pending})
+            </Button>
+            <Button 
+              onClick={() => setStatusFilter('failed')} 
+              variant={statusFilter === 'failed' ? 'default' : 'outline'} 
+              size="sm"
+              className={statusFilter === 'failed' ? 'bg-red-600 hover:bg-red-700' : 'text-red-600 border-red-600 hover:bg-red-50'}
+            >
+              ❌ Failed ({statusCounts.failed})
+            </Button>
+          </div>
+
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Subscribers</CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{subscribers.length}</div>
+                <div className="text-2xl font-bold">{statusCounts.total}</div>
                 <p className="text-xs text-muted-foreground">
                   Growing community
                 </p>
@@ -212,39 +274,39 @@ export default function AdminSubscribersPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Successful</CardTitle>
+                <div className="h-4 w-4 rounded-full bg-green-500"></div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {subscribers.filter(sub => 
-                    new Date(sub.subscribedAt).getMonth() === new Date().getMonth() &&
-                    new Date(sub.subscribedAt).getFullYear() === new Date().getFullYear()
-                  ).length}
-                </div>
+                <div className="text-2xl font-bold text-green-600">{statusCounts.success}</div>
                 <p className="text-xs text-muted-foreground">
-                  New subscribers
+                  Email delivered
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Latest Subscriber</CardTitle>
-                <Mail className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Pending</CardTitle>
+                <div className="h-4 w-4 rounded-full bg-yellow-500"></div>
               </CardHeader>
               <CardContent>
-                <div className="text-sm font-medium">
-                  {subscribers.length > 0 
-                    ? subscribers.sort((a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime())[0]?.email.split('@')[0] + '...'
-                    : 'No subscribers yet'
-                  }
-                </div>
+                <div className="text-2xl font-bold text-yellow-600">{statusCounts.pending}</div>
                 <p className="text-xs text-muted-foreground">
-                  {subscribers.length > 0 
-                    ? formatDate(subscribers.sort((a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime())[0]?.subscribedAt)
-                    : 'Waiting for first subscriber'
-                  }
+                  In progress
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Failed</CardTitle>
+                <div className="h-4 w-4 rounded-full bg-red-500"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">{statusCounts.failed}</div>
+                <p className="text-xs text-muted-foreground">
+                  Needs attention
                 </p>
               </CardContent>
             </Card>
@@ -253,7 +315,12 @@ export default function AdminSubscribersPage() {
           {/* Subscribers List */}
           <Card>
             <CardHeader>
-              <CardTitle>All Subscribers</CardTitle>
+              <CardTitle>
+                {statusFilter === 'all' 
+                  ? `All Subscribers (${filteredSubscribers.length})`
+                  : `${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)} Subscribers (${filteredSubscribers.length})`
+                }
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -268,14 +335,19 @@ export default function AdminSubscribersPage() {
                     Try Again
                   </Button>
                 </div>
-              ) : subscribers.length === 0 ? (
+              ) : filteredSubscribers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No subscribers yet. Share your newsletter to start growing your audience!</p>
+                  <p>
+                    {statusFilter === 'all' 
+                      ? 'No subscribers yet. Share your newsletter to start growing your audience!'
+                      : `No ${statusFilter} subscribers found.`
+                    }
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {subscribers
+                  {filteredSubscribers
                     .sort((a, b) => new Date(b.subscribedAt).getTime() - new Date(a.subscribedAt).getTime())
                     .map((subscriber, index) => (
                     <div key={subscriber.email} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
@@ -285,15 +357,44 @@ export default function AdminSubscribersPage() {
                             {subscriber.email.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <p className="font-medium">{subscriber.email}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{subscriber.email}</p>
+                            <Badge 
+                              variant={
+                                subscriber.status === 'success' ? 'default' :
+                                subscriber.status === 'failed' ? 'destructive' :
+                                'secondary'
+                              }
+                              className={
+                                subscriber.status === 'success' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                                subscriber.status === 'failed' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                                'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                              }
+                            >
+                              {subscriber.status === 'success' ? '✅ Success' :
+                               subscriber.status === 'failed' ? '❌ Failed' :
+                               '⏳ Pending'}
+                            </Badge>
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             Joined {formatDate(subscriber.subscribedAt)}
                           </p>
+                          {subscriber.status === 'failed' && subscriber.errorMessage && (
+                            <p className="text-xs text-red-600 mt-1">
+                              Error: {subscriber.errorMessage}
+                            </p>
+                          )}
+                          {subscriber.status === 'success' && (
+                            <div className="flex gap-4 text-xs text-muted-foreground mt-1">
+                              <span>📧 Welcome: {subscriber.emailSent ? 'Sent' : 'Failed'}</span>
+                              <span>🔔 Notification: {subscriber.notificationSent ? 'Sent' : 'Failed'}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant="secondary">#{subscribers.length - index}</Badge>
+                        <Badge variant="secondary">#{filteredSubscribers.length - index}</Badge>
                         {new Date(subscriber.subscribedAt).getTime() > Date.now() - 24 * 60 * 60 * 1000 && (
                           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">New</Badge>
                         )}

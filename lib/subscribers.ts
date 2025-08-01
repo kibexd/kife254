@@ -8,6 +8,10 @@ export interface Subscriber {
   subscribedAt: string
   ip?: string
   userAgent?: string
+  status: 'pending' | 'success' | 'failed'
+  emailSent?: boolean
+  notificationSent?: boolean
+  errorMessage?: string
 }
 
 // Ensure the data directory exists
@@ -101,4 +105,37 @@ export async function deleteSubscriber(email: string): Promise<boolean> {
 // Delete all subscribers (for testing purposes)
 export async function deleteAllSubscribers(): Promise<void> {
   await fs.writeFile(SUBSCRIBERS_FILE, JSON.stringify([], null, 2))
+}
+
+// Update subscriber status and error information
+export async function updateSubscriberStatus(
+  email: string, 
+  status: 'success' | 'failed', 
+  emailSent?: boolean,
+  notificationSent?: boolean,
+  errorMessage?: string
+): Promise<void> {
+  const subscribers = await getSubscribers()
+  const subscriberIndex = subscribers.findIndex(sub => 
+    sub.email.toLowerCase() === email.toLowerCase()
+  )
+  
+  if (subscriberIndex !== -1) {
+    subscribers[subscriberIndex] = {
+      ...subscribers[subscriberIndex],
+      status,
+      emailSent: emailSent ?? subscribers[subscriberIndex].emailSent,
+      notificationSent: notificationSent ?? subscribers[subscriberIndex].notificationSent,
+      errorMessage: errorMessage || subscribers[subscriberIndex].errorMessage
+    }
+    
+    await fs.writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2))
+  }
+}
+
+// Get subscribers by status
+export async function getSubscribersByStatus(status?: 'pending' | 'success' | 'failed'): Promise<Subscriber[]> {
+  const subscribers = await getSubscribers()
+  if (!status) return subscribers
+  return subscribers.filter(sub => sub.status === status)
 }

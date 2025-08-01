@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { isEmailSubscribed, addSubscriber } from '@/lib/subscribers';
+import { isEmailSubscribed, addSubscriber, updateSubscriberStatus } from '@/lib/subscribers';
 
 export async function POST(request: Request) {
   try {
@@ -74,22 +74,19 @@ export async function POST(request: Request) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     console.log('Adding subscriber to storage...');
-    // Save subscriber to storage
-    try {
-      await addSubscriber({
-        email,
-        subscribedAt: new Date().toISOString(),
-        ip,
-        userAgent
-      });
-      console.log('Subscriber added successfully');
-    } catch (storageError) {
-      console.error('Failed to add subscriber to storage:', storageError);
-      // Continue with email sending even if storage fails
-    }
+    // Save subscriber to storage FIRST (before emails) with pending status
+    await addSubscriber({
+      email,
+      subscribedAt: new Date().toISOString(),
+      ip,
+      userAgent,
+      status: 'pending'
+    });
+    console.log('Subscriber added successfully with pending status');
 
     console.log('Sending notification email...');
     // 1. Send notification to you
+    let notificationSent = false
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -108,6 +105,7 @@ export async function POST(request: Request) {
           </div>
         `,
       });
+      notificationSent = true
       console.log('Notification email sent successfully');
     } catch (notificationError) {
       console.error('Failed to send notification email:', notificationError);
@@ -116,11 +114,15 @@ export async function POST(request: Request) {
 
     console.log('Sending welcome email...');
     // 2. Send beautiful welcome email to subscriber
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "🎉 Welcome to My Tech Journey!",
-      html: `
+    let emailSent = false
+    let errorMessage = ''
+    
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "🎉 Welcome to My Tech Journey!",
+        html: `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -159,20 +161,20 @@ export async function POST(request: Request) {
               <!-- What to expect -->
               <div style="background: #f8fafc; border-radius: 12px; padding: 30px; margin: 35px 0; border-left: 4px solid #4f46e5;">
                 <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
-                  � What you can expect
+                  🎯 What you can expect
                 </h3>
                 <div style="color: #64748b; font-size: 15px; line-height: 1.7;">
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span style="margin-right: 10px; margin-top: 2px;">💻</span>
                     <span><strong style="color: #374151;">Web Development insights</strong> - Modern techniques, frameworks, and best practices</span>
                   </div>
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span style="margin-right: 10px; margin-top: 2px;">🔐</span>
                     <span><strong style="color: #374151;">Cybersecurity guidance</strong> - Protecting your digital world with practical tips</span>
                   </div>
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
                     <span style="margin-right: 10px; margin-top: 2px;">⚙️</span>
-                    <span><strong style="color: #374151;">ERP & Business Solutions</strong> - Streamlining business processes effectively</span>
+                    <span><strong style="color: #374151;">ERP &amp; Business Solutions</strong> - Streamlining business processes effectively</span>
                   </div>
                   <div style="display: flex; align-items: flex-start;">
                     <span style="margin-right: 10px; margin-top: 2px;">💡</span>
@@ -222,12 +224,35 @@ export async function POST(request: Request) {
         </body>
         </html>
       `,
-    });
-    console.log('Welcome email sent successfully');
+      });
+      emailSent = true
+      console.log('Welcome email sent successfully');
+    } catch (welcomeEmailError) {
+      console.error('Failed to send welcome email:', welcomeEmailError);
+      errorMessage = welcomeEmailError instanceof Error ? welcomeEmailError.message : 'Unknown email error'
+      // Continue - subscriber is still saved even if welcome email fails
+    }
+    
+    // Update subscriber status based on email results
+    try {
+      if (emailSent) {
+        await updateSubscriberStatus(email, 'success', emailSent, notificationSent)
+        console.log(`✅ Subscriber status updated to success for: ${email}`)
+      } else {
+        await updateSubscriberStatus(email, 'failed', emailSent, notificationSent, errorMessage)
+        console.log(`❌ Subscriber status updated to failed for: ${email}`)
+      }
+    } catch (statusUpdateError) {
+      console.error('Failed to update subscriber status:', statusUpdateError)
+    }
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Successfully subscribed to newsletter' 
+      message: emailSent 
+        ? 'Successfully subscribed and welcome email sent!'
+        : 'Successfully subscribed! Welcome email will be sent shortly.',
+      emailSent,
+      notificationSent
     });
 
   } catch (error) {
