@@ -28,6 +28,7 @@ export default function AdminSubscribersPage() {
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [deletingEmail, setDeletingEmail] = useState<string | null>(null)
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showDeleteByStatusDialog, setShowDeleteByStatusDialog] = useState<'success' | 'pending' | 'failed' | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'success' | 'failed'>('all')
 
   // Check authentication on mount
@@ -153,6 +154,29 @@ export default function AdminSubscribersPage() {
     }
   }
 
+  const deleteByStatus = async (status: 'success' | 'pending' | 'failed') => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/admin/subscribers?deleteByStatus=${status}`, {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+      
+      if (res.ok) {
+        // Remove subscribers with the specified status
+        setSubscribers(prev => prev.filter(sub => sub.status !== status && (status !== 'pending' || sub.status)))
+        setError("")
+        setShowDeleteByStatusDialog(null)
+      } else {
+        setError(data.error || `Failed to delete ${status} subscribers`)
+      }
+    } catch (err) {
+      setError(`Failed to delete ${status} subscribers`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchSubscribers()
@@ -239,6 +263,16 @@ export default function AdminSubscribersPage() {
             >
               ✅ Success ({statusCounts.success})
             </Button>
+            {statusCounts.success > 0 && (
+              <Button 
+                onClick={() => setShowDeleteByStatusDialog('success')} 
+                variant="destructive" 
+                size="sm"
+                className="ml-1"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
             <Button 
               onClick={() => setStatusFilter('pending')} 
               variant={statusFilter === 'pending' ? 'default' : 'outline'} 
@@ -247,6 +281,16 @@ export default function AdminSubscribersPage() {
             >
               ⏳ Pending ({statusCounts.pending})
             </Button>
+            {statusCounts.pending > 0 && (
+              <Button 
+                onClick={() => setShowDeleteByStatusDialog('pending')} 
+                variant="destructive" 
+                size="sm"
+                className="ml-1"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
             <Button 
               onClick={() => setStatusFilter('failed')} 
               variant={statusFilter === 'failed' ? 'default' : 'outline'} 
@@ -255,6 +299,16 @@ export default function AdminSubscribersPage() {
             >
               ❌ Failed ({statusCounts.failed})
             </Button>
+            {statusCounts.failed > 0 && (
+              <Button 
+                onClick={() => setShowDeleteByStatusDialog('failed')} 
+                variant="destructive" 
+                size="sm"
+                className="ml-1"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
           </div>
 
           {/* Stats Cards */}
@@ -457,6 +511,54 @@ export default function AdminSubscribersPage() {
                   <Trash2 className="h-4 w-4" />
                 )}
                 Delete All
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete By Status Confirmation Dialog */}
+      {showDeleteByStatusDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background border rounded-lg p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">
+                  Delete {showDeleteByStatusDialog.charAt(0).toUpperCase() + showDeleteByStatusDialog.slice(1)} Subscribers
+                </h3>
+                <p className="text-sm text-muted-foreground">This action cannot be undone</p>
+              </div>
+            </div>
+            <p className="text-sm mb-6">
+              Are you sure you want to delete all {
+                showDeleteByStatusDialog === 'success' ? statusCounts.success :
+                showDeleteByStatusDialog === 'pending' ? statusCounts.pending :
+                statusCounts.failed
+              } {showDeleteByStatusDialog} subscribers? This will permanently remove their data.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button 
+                onClick={() => setShowDeleteByStatusDialog(null)} 
+                variant="outline"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => deleteByStatus(showDeleteByStatusDialog)} 
+                variant="destructive"
+                disabled={loading}
+                className="gap-2"
+              >
+                {loading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                Delete {showDeleteByStatusDialog.charAt(0).toUpperCase() + showDeleteByStatusDialog.slice(1)}
               </Button>
             </div>
           </div>

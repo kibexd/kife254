@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSubscribers, getSubscriberCount, getRecentSubscribers, deleteSubscriber, deleteAllSubscribers } from '@/lib/subscribers';
+import { getSubscribers, getSubscriberCount, getRecentSubscribers, deleteSubscriber, deleteAllSubscribers, getSubscribersByStatus } from '@/lib/subscribers';
 
 export async function GET(request: Request) {
   try {
@@ -46,6 +46,7 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
     const deleteAll = searchParams.get('deleteAll');
+    const deleteByStatus = searchParams.get('deleteByStatus');
 
     if (deleteAll === 'true') {
       // Delete all subscribers
@@ -53,6 +54,33 @@ export async function DELETE(request: Request) {
       return NextResponse.json({
         success: true,
         message: 'All subscribers deleted successfully'
+      });
+    } else if (deleteByStatus) {
+      // Delete subscribers by status
+      const validStatuses = ['pending', 'success', 'failed'];
+      if (!validStatuses.includes(deleteByStatus)) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: 'Invalid status. Must be pending, success, or failed'
+          },
+          { status: 400 }
+        );
+      }
+
+      // Get subscribers with the specified status
+      const subscribersToDelete = await getSubscribersByStatus(deleteByStatus as 'pending' | 'success' | 'failed');
+      
+      // Delete each subscriber
+      let deletedCount = 0;
+      for (const subscriber of subscribersToDelete) {
+        const deleted = await deleteSubscriber(subscriber.email);
+        if (deleted) deletedCount++;
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `${deletedCount} ${deleteByStatus} subscribers deleted successfully`
       });
     } else if (email) {
       // Delete specific subscriber
