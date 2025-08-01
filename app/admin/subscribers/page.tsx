@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Mail, Users, Calendar, Download, RefreshCw, LogOut, Trash2, AlertTriangle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { LoginPage } from "@/components/admin-login"
+import { formatKenyanTime } from "@/lib/time-utils"
 
 interface Subscriber {
   email: string
@@ -98,9 +99,9 @@ export default function AdminSubscribersPage() {
 
   const exportSubscribers = () => {
     const csvContent = [
-      "Email,Subscribed At,Status,Email Sent,Notification Sent,Error Message,IP Address,User Agent",
+      "Email,Subscribed At (EAT),Status,Email Sent,Notification Sent,Error Message,IP Address,User Agent",
       ...filteredSubscribers.map(sub => 
-        `"${sub.email}","${sub.subscribedAt}","${sub.status || 'pending'}","${sub.emailSent ? 'Yes' : 'No'}","${sub.notificationSent ? 'Yes' : 'No'}","${sub.errorMessage || 'N/A'}","${sub.ip || 'N/A'}","${sub.userAgent || 'N/A'}"`
+        `"${sub.email}","${formatKenyanTime(sub.subscribedAt)}","${sub.status || 'pending'}","${sub.emailSent ? 'Yes' : 'No'}","${sub.notificationSent ? 'Yes' : 'No'}","${sub.errorMessage || 'N/A'}","${sub.ip || 'N/A'}","${sub.userAgent || 'N/A'}"`
       )
     ].join("\\n")
     
@@ -207,13 +208,7 @@ export default function AdminSubscribersPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    return formatKenyanTime(dateString) + ' (EAT)'
   }
 
   return (

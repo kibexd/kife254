@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PageContainer } from "@/components/page-container"
 import { Badge } from "@/components/ui/badge"
+import { formatKenyanTime } from "@/lib/time-utils"
+import { LoginPage } from "@/components/admin-login"
+import { LogOut } from "lucide-react"
 
 export default function DebugPage() {
   const [email, setEmail] = useState("")
@@ -14,13 +17,61 @@ export default function DebugPage() {
   const [envCheck, setEnvCheck] = useState<any>(null)
   const [subscribersData, setSubscribersData] = useState<any>(null)
   const [storageInfo, setStorageInfo] = useState<any>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
 
   // Check environment and system status
   useEffect(() => {
-    checkEnvironment()
-    fetchSubscribers()
-    checkStorageInfo()
+    const checkAuth = () => {
+      const isAuth = sessionStorage.getItem("debug_authenticated") === "true"
+      setIsAuthenticated(isAuth)
+      setCheckingAuth(false)
+    }
+    
+    checkAuth()
   }, [])
+
+  // Load data only when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkEnvironment()
+      fetchSubscribers()
+      checkStorageInfo()
+    }
+  }, [isAuthenticated])
+
+  const handleLogin = (success: boolean) => {
+    if (success) {
+      sessionStorage.setItem("debug_authenticated", "true")
+      setIsAuthenticated(true)
+    }
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("debug_authenticated")
+    setIsAuthenticated(false)
+  }
+
+  // Show login page if not authenticated
+  if (checkingAuth) {
+    return (
+      <PageContainer>
+        <section className="container pt-32 pb-20">
+          <div className="max-w-md mx-auto">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center">Checking authentication...</div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </PageContainer>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} authType="debug" />
+  }
 
   const checkEnvironment = async () => {
     try {
@@ -103,6 +154,22 @@ export default function DebugPage() {
     <PageContainer>
       <section className="container pt-32 pb-20">
         <div className="max-w-4xl mx-auto space-y-6">
+          
+          {/* Header with Logout */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-2xl font-bold">🔧 Debug Panel</CardTitle>
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </CardHeader>
+          </Card>
           
           {/* Environment Check */}
           <Card>
@@ -208,7 +275,7 @@ export default function DebugPage() {
                                 {sub.status || 'pending'}
                               </span>
                               <span className="text-slate-600 dark:text-slate-400"> - </span>
-                              <span className="text-slate-500 dark:text-slate-500">{new Date(sub.subscribedAt).toLocaleString()}</span>
+                              <span className="text-slate-500 dark:text-slate-500">{formatKenyanTime(sub.subscribedAt)} (EAT)</span>
                             </div>
                           ))}
                         </div>

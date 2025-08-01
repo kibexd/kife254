@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { isEmailSubscribed, addSubscriber, updateSubscriberStatus } from '@/lib/subscribers';
+import { getKenyanTimeString, formatKenyanTimeForEmail } from '@/lib/time-utils';
 
 export async function POST(request: Request) {
   try {
@@ -75,9 +76,10 @@ export async function POST(request: Request) {
 
     console.log('Adding subscriber to storage...');
     // Save subscriber to storage FIRST (before emails) with pending status
+    const subscribedTime = new Date()
     await addSubscriber({
       email,
-      subscribedAt: new Date().toISOString(),
+      subscribedAt: getKenyanTimeString(),
       ip,
       userAgent,
       status: 'pending'
@@ -98,7 +100,7 @@ export async function POST(request: Request) {
               <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
               <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
-                <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${formatKenyanTimeForEmail(subscribedTime)} (EAT)</p>
               </div>
               <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
             </div>

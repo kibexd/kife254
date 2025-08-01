@@ -9,9 +9,11 @@ import { cn } from "@/lib/utils"
 
 interface LoginPageProps {
   onLogin: (success: boolean) => void
+  authType?: 'admin' | 'debug'
+  pageTitle?: string
 }
 
-export function LoginPage({ onLogin }: LoginPageProps) {
+export function LoginPage({ onLogin, authType = 'admin', pageTitle }: LoginPageProps) {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -25,8 +27,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     // Simple client-side auth (for demo purposes)
     if (username === "kife254" && password === "kife") {
-      // Store auth in session storage
-      sessionStorage.setItem("admin_authenticated", "true")
+      // Store auth in session storage based on auth type
+      const sessionKey = authType === 'debug' ? 'debug_authenticated' : 'admin_authenticated'
+      sessionStorage.setItem(sessionKey, "true")
       onLogin(true)
     } else {
       setError("Invalid credentials. Please try again.")
@@ -51,7 +54,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
           </div>
           <div className="text-center space-y-2">
-            <CardTitle className="text-2xl font-bold">Admin Access</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              {pageTitle || (authType === 'debug' ? 'Debug Panel Access' : 'Admin Access')}
+            </CardTitle>
             <p className="text-muted-foreground">
               Sign in to access the subscriber dashboard
             </p>
