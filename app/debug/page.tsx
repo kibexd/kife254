@@ -40,6 +40,24 @@ export default function DebugPage() {
     }
   }
 
+  const forceCleanData = async () => {
+    try {
+      const res = await fetch("/api/admin/subscribers?deleteAll=true", {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+      
+      if (res.ok) {
+        await fetchSubscribers() // Refresh the data
+        setResponse({ status: res.status, data: { success: true, message: "All data forcefully cleaned!" } })
+      } else {
+        setResponse({ status: res.status, data })
+      }
+    } catch (error) {
+      setResponse({ error: error instanceof Error ? error.message : 'Failed to clean data' })
+    }
+  }
+
   const testSubscription = async () => {
     if (!email) return
     
@@ -88,7 +106,9 @@ export default function DebugPage() {
                     </div>
                   </div>
                   {envCheck.error && (
-                    <div className="text-red-600 text-sm">{envCheck.error}</div>
+                    <div className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800">
+                      {envCheck.error}
+                    </div>
                   )}
                 </div>
               ) : (
@@ -106,15 +126,27 @@ export default function DebugPage() {
               {subscribersData ? (
                 <div className="space-y-2">
                   {subscribersData.error ? (
-                    <div className="text-red-600">{subscribersData.error}</div>
+                    <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded border border-red-200 dark:border-red-800">
+                      {subscribersData.error}
+                    </div>
                   ) : (
                     <div>
                       <p>Total: {subscribersData.total || 0}</p>
                       {subscribersData.subscribers && subscribersData.subscribers.length > 0 && (
                         <div className="space-y-1 mt-2">
                           {subscribersData.subscribers.slice(0, 3).map((sub: any, i: number) => (
-                            <div key={i} className="text-sm bg-gray-50 p-2 rounded">
-                              {sub.email} - {sub.status || 'no status'} - {new Date(sub.subscribedAt).toLocaleString()}
+                            <div key={i} className="text-sm bg-slate-100 dark:bg-slate-800 p-2 rounded border">
+                              <span className="font-medium text-slate-900 dark:text-slate-100">{sub.email}</span>
+                              <span className="text-slate-600 dark:text-slate-400"> - </span>
+                              <span className={`font-medium ${
+                                sub.status === 'success' ? 'text-green-600 dark:text-green-400' :
+                                sub.status === 'failed' ? 'text-red-600 dark:text-red-400' :
+                                'text-yellow-600 dark:text-yellow-400'
+                              }`}>
+                                {sub.status || 'pending'}
+                              </span>
+                              <span className="text-slate-600 dark:text-slate-400"> - </span>
+                              <span className="text-slate-500 dark:text-slate-500">{new Date(sub.subscribedAt).toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
@@ -147,12 +179,15 @@ export default function DebugPage() {
                 <Button onClick={fetchSubscribers} variant="outline">
                   Refresh Data
                 </Button>
+                <Button onClick={forceCleanData} variant="destructive">
+                  🗑️ Force Clean All Data
+                </Button>
               </div>
               
               {response && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold mb-2">API Response:</h4>
-                  <pre className="text-sm overflow-auto">
+                <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border">
+                  <h4 className="font-semibold mb-2 text-slate-900 dark:text-slate-100">API Response:</h4>
+                  <pre className="text-sm overflow-auto text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 p-3 rounded border">
                     {JSON.stringify(response, null, 2)}
                   </pre>
                 </div>

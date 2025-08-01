@@ -69,7 +69,14 @@ export async function DELETE(request: Request) {
       }
 
       // Get subscribers with the specified status
-      const subscribersToDelete = await getSubscribersByStatus(deleteByStatus as 'pending' | 'success' | 'failed');
+      let subscribersToDelete;
+      if (deleteByStatus === 'pending') {
+        subscribersToDelete = await getSubscribers().then(subs => 
+          subs.filter(sub => !sub.status || sub.status === 'pending')
+        );
+      } else {
+        subscribersToDelete = await getSubscribersByStatus(deleteByStatus as 'success' | 'failed');
+      }
       
       // Delete each subscriber
       let deletedCount = 0;

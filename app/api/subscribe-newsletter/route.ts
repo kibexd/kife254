@@ -130,26 +130,26 @@ export async function POST(request: Request) {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Welcome to Our Newsletter</title>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #f8fafc; line-height: 1.6;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8fafc; line-height: 1.6;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0;">
             
-            <!-- Header with gradient -->
-            <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 40px 30px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;">
+            <!-- Header -->
+            <div style="background-color: #4f46e5; padding: 40px 30px; text-align: center;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
                 Welcome to My Journey! 🎉
               </h1>
-              <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 16px;">
+              <p style="color: #ffffff; margin: 15px 0 0 0; font-size: 16px;">
                 Thanks for joining me on this tech adventure
               </p>
             </div>
             
             <!-- Main content -->
-            <div style="padding: 40px 30px;">
+            <div style="padding: 40px 30px; background-color: #ffffff;">
               <div style="text-align: center; margin-bottom: 35px;">
-                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);">
+                <div style="width: 70px; height: 70px; background-color: #4f46e5; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center;">
                   <span style="font-size: 28px;">✨</span>
                 </div>
-                <h2 style="color: #1e293b; margin: 0 0 15px 0; font-size: 22px; font-weight: 600;">
+                <h2 style="color: #1e293b; margin: 0 0 15px 0; font-size: 22px; font-weight: bold;">
                   You're all set!
                 </h2>
                 <p style="color: #64748b; font-size: 16px; line-height: 1.7; margin: 0;">
@@ -159,45 +159,39 @@ export async function POST(request: Request) {
               </div>
               
               <!-- What to expect -->
-              <div style="background: #f8fafc; border-radius: 12px; padding: 30px; margin: 35px 0; border-left: 4px solid #4f46e5;">
-                <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+              <div style="background-color: #f8fafc; border-radius: 8px; padding: 30px; margin: 35px 0; border-left: 4px solid #4f46e5;">
+                <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: bold;">
                   🎯 What you can expect
                 </h3>
                 <div style="color: #64748b; font-size: 15px; line-height: 1.7;">
-                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">💻</span>
-                    <span><strong style="color: #374151;">Web Development insights</strong> - Modern techniques, frameworks, and best practices</span>
-                  </div>
-                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">🔐</span>
-                    <span><strong style="color: #374151;">Cybersecurity guidance</strong> - Protecting your digital world with practical tips</span>
-                  </div>
-                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">⚙️</span>
-                    <span><strong style="color: #374151;">ERP &amp; Business Solutions</strong> - Streamlining business processes effectively</span>
-                  </div>
-                  <div style="display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">💡</span>
-                    <span><strong style="color: #374151;">Industry trends</strong> - What's shaping the future of technology</span>
-                  </div>
+                  <p style="margin: 0 0 12px 0;">💻 <strong style="color: #374151;">Web Development insights</strong> - Modern techniques, frameworks, and best practices</p>
+                  <p style="margin: 0 0 12px 0;">🔐 <strong style="color: #374151;">Cybersecurity guidance</strong> - Protecting your digital world with practical tips</p>
+                  <p style="margin: 0 0 12px 0;">⚙️ <strong style="color: #374151;">ERP &amp; Business Solutions</strong> - Streamlining business processes effectively</p>
+                  <p style="margin: 0;">💡 <strong style="color: #374151;">Industry trends</strong> - What's shaping the future of technology</p>
                 </div>
               </div>
               
               <!-- Personal note -->
-              <div style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-radius: 12px; padding: 25px; margin: 35px 0; text-align: center;">
+              <div style="background-color: #f1f5f9; border-radius: 8px; padding: 25px; margin: 35px 0; text-align: center;">
                 <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0; font-style: italic;">
                   "I believe in sharing knowledge that makes a real difference. Every piece of content I create is designed to help you grow, solve problems, and stay ahead in this fast-evolving tech landscape."
                 </p>
-                <p style="color: #64748b; font-size: 14px; margin: 15px 0 0 0; font-weight: 500;">
+                <p style="color: #64748b; font-size: 14px; margin: 15px 0 0 0; font-weight: bold;">
                   - Enock Kibe
                 </p>
               </div>
               
               <!-- CTA Button -->
               <div style="text-align: center; margin: 40px 0;">
-                <a href="https://your-blog-url.com" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; text-decoration: none; padding: 14px 30px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); transition: transform 0.2s;">
-                  📖 Visit My Blog
-                </a>
+                <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+                  <tr>
+                    <td style="background-color: #4f46e5; border-radius: 8px; padding: 14px 30px;">
+                      <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3001'}/blog" style="color: #ffffff; text-decoration: none; font-weight: bold; font-size: 16px; display: block;">
+                        📖 Visit My Blog
+                      </a>
+                    </td>
+                  </tr>
+                </table>
               </div>
               
               <!-- Footer message -->
@@ -211,7 +205,7 @@ export async function POST(request: Request) {
             </div>
             
             <!-- Footer -->
-            <div style="background: #1e293b; padding: 25px; text-align: center;">
+            <div style="background-color: #1e293b; padding: 25px; text-align: center;">
               <p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px 0;">
                 © 2025 Tech Insights Newsletter. All rights reserved.
               </p>

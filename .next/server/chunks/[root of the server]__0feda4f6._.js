@@ -252,7 +252,12 @@ async function DELETE(request) {
                 });
             }
             // Get subscribers with the specified status
-            const subscribersToDelete = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getSubscribersByStatus"])(deleteByStatus);
+            let subscribersToDelete;
+            if (deleteByStatus === 'pending') {
+                subscribersToDelete = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getSubscribers"])().then((subs)=>subs.filter((sub)=>!sub.status || sub.status === 'pending'));
+            } else {
+                subscribersToDelete = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getSubscribersByStatus"])(deleteByStatus);
+            }
             // Delete each subscriber
             let deletedCount = 0;
             for (const subscriber of subscribersToDelete){

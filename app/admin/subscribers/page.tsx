@@ -77,6 +77,8 @@ export default function AdminSubscribersPage() {
   useEffect(() => {
     if (statusFilter === 'all') {
       setFilteredSubscribers(subscribers)
+    } else if (statusFilter === 'pending') {
+      setFilteredSubscribers(subscribers.filter(sub => !sub.status || sub.status === 'pending'))
     } else {
       setFilteredSubscribers(subscribers.filter(sub => sub.status === statusFilter))
     }
@@ -85,7 +87,7 @@ export default function AdminSubscribersPage() {
   // Get counts for each status
   const getStatusCounts = () => {
     const total = subscribers.length
-    const pending = subscribers.filter(sub => sub.status === 'pending' || !sub.status).length
+    const pending = subscribers.filter(sub => !sub.status || sub.status === 'pending').length
     const success = subscribers.filter(sub => sub.status === 'success').length
     const failed = subscribers.filter(sub => sub.status === 'failed').length
     
@@ -164,7 +166,11 @@ export default function AdminSubscribersPage() {
       
       if (res.ok) {
         // Remove subscribers with the specified status
-        setSubscribers(prev => prev.filter(sub => sub.status !== status && (status !== 'pending' || sub.status)))
+        if (status === 'pending') {
+          setSubscribers(prev => prev.filter(sub => sub.status && sub.status !== 'pending'))
+        } else {
+          setSubscribers(prev => prev.filter(sub => sub.status !== status))
+        }
         setError("")
         setShowDeleteByStatusDialog(null)
       } else {
