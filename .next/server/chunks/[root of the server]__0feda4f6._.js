@@ -79,6 +79,7 @@ __turbopack_context__.s({
     "deleteAllSubscribers": (()=>deleteAllSubscribers),
     "deleteSubscriber": (()=>deleteSubscriber),
     "getRecentSubscribers": (()=>getRecentSubscribers),
+    "getStorageInfo": (()=>getStorageInfo),
     "getSubscriberCount": (()=>getSubscriberCount),
     "getSubscribers": (()=>getSubscribers),
     "getSubscribersByStatus": (()=>getSubscribersByStatus),
@@ -90,6 +91,20 @@ var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$2
 ;
 ;
 const SUBSCRIBERS_FILE = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'data', 'subscribers.json');
+// In-memory storage for production fallback
+let memoryStorage = [];
+let isMemoryMode = false;
+// Check if we can write to file system
+async function canWriteToFileSystem() {
+    try {
+        const testFile = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'test-write.tmp');
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(testFile, 'test');
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].unlink(testFile);
+        return true;
+    } catch  {
+        return false;
+    }
+}
 // Ensure the data directory exists
 async function ensureDataDirectory() {
     const dataDir = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'data');
@@ -111,10 +126,18 @@ async function ensureSubscribersFile() {
     }
 }
 async function getSubscribers() {
+    // Check if we should use memory mode
+    if (isMemoryMode || !await canWriteToFileSystem()) {
+        isMemoryMode = true;
+        return memoryStorage;
+    }
     await ensureSubscribersFile();
     try {
         const data = await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].readFile(SUBSCRIBERS_FILE, 'utf-8');
-        return JSON.parse(data);
+        const fileData = JSON.parse(data);
+        // Sync file data to memory in case we need to switch modes
+        memoryStorage = fileData;
+        return fileData;
     } catch  {
         return [];
     }
@@ -131,7 +154,20 @@ async function addSubscriber(subscriber) {
         throw new Error('Email already subscribed');
     }
     subscribers.push(subscriber);
-    await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    // Try to write to file, fallback to memory if it fails
+    if (isMemoryMode || !await canWriteToFileSystem()) {
+        isMemoryMode = true;
+        memoryStorage = subscribers;
+        return;
+    }
+    try {
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    } catch (error) {
+        // File system write failed, switch to memory mode
+        isMemoryMode = true;
+        memoryStorage = subscribers;
+        console.log('Switched to memory storage mode due to file system restrictions');
+    }
 }
 async function getSubscriberCount() {
     const subscribers = await getSubscribers();
@@ -149,11 +185,38 @@ async function deleteSubscriber(email) {
         // Email not found
         return false;
     }
-    await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(updatedSubscribers, null, 2));
-    return true;
+    // Try to write to file, fallback to memory if it fails
+    if (isMemoryMode || !await canWriteToFileSystem()) {
+        isMemoryMode = true;
+        memoryStorage = updatedSubscribers;
+        return true;
+    }
+    try {
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(updatedSubscribers, null, 2));
+        return true;
+    } catch (error) {
+        // File system write failed, switch to memory mode
+        isMemoryMode = true;
+        memoryStorage = updatedSubscribers;
+        console.log('Switched to memory storage mode due to file system restrictions');
+        return true;
+    }
 }
 async function deleteAllSubscribers() {
-    await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify([], null, 2));
+    // Try to write to file, fallback to memory if it fails
+    if (isMemoryMode || !await canWriteToFileSystem()) {
+        isMemoryMode = true;
+        memoryStorage = [];
+        return;
+    }
+    try {
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify([], null, 2));
+    } catch (error) {
+        // File system write failed, switch to memory mode
+        isMemoryMode = true;
+        memoryStorage = [];
+        console.log('Switched to memory storage mode due to file system restrictions');
+    }
 }
 async function updateSubscriberStatus(email, status, emailSent, notificationSent, errorMessage) {
     const subscribers = await getSubscribers();
@@ -166,13 +229,35 @@ async function updateSubscriberStatus(email, status, emailSent, notificationSent
             notificationSent: notificationSent ?? subscribers[subscriberIndex].notificationSent,
             errorMessage: errorMessage || subscribers[subscriberIndex].errorMessage
         };
-        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+        // Try to write to file, fallback to memory if it fails
+        if (isMemoryMode || !await canWriteToFileSystem()) {
+            isMemoryMode = true;
+            memoryStorage = subscribers;
+            return;
+        }
+        try {
+            await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+        } catch (error) {
+            // File system write failed, switch to memory mode
+            isMemoryMode = true;
+            memoryStorage = subscribers;
+            console.log('Switched to memory storage mode due to file system restrictions');
+        }
     }
 }
 async function getSubscribersByStatus(status) {
     const subscribers = await getSubscribers();
     if (!status) return subscribers;
     return subscribers.filter((sub)=>sub.status === status);
+}
+async function getStorageInfo() {
+    const canWrite = await canWriteToFileSystem();
+    return {
+        canWriteToFileSystem: canWrite,
+        usingMemoryMode: isMemoryMode,
+        storageType: isMemoryMode ? 'memory' : 'file',
+        dataLocation: isMemoryMode ? 'In-memory (resets on deploy)' : SUBSCRIBERS_FILE
+    };
 }
 }}),
 "[project]/app/api/admin/subscribers/route.ts [app-route] (ecmascript)": ((__turbopack_context__) => {

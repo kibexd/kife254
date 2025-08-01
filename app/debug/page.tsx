@@ -13,11 +13,13 @@ export default function DebugPage() {
   const [loading, setLoading] = useState(false)
   const [envCheck, setEnvCheck] = useState<any>(null)
   const [subscribersData, setSubscribersData] = useState<any>(null)
+  const [storageInfo, setStorageInfo] = useState<any>(null)
 
   // Check environment and system status
   useEffect(() => {
     checkEnvironment()
     fetchSubscribers()
+    checkStorageInfo()
   }, [])
 
   const checkEnvironment = async () => {
@@ -27,6 +29,16 @@ export default function DebugPage() {
       setEnvCheck(data)
     } catch (error) {
       setEnvCheck({ error: "Failed to check environment" })
+    }
+  }
+
+  const checkStorageInfo = async () => {
+    try {
+      const res = await fetch("/api/debug/storage")
+      const data = await res.json()
+      setStorageInfo(data)
+    } catch (error) {
+      setStorageInfo({ error: "Failed to check storage info" })
     }
   }
 
@@ -49,7 +61,14 @@ export default function DebugPage() {
       
       if (res.ok) {
         await fetchSubscribers() // Refresh the data
-        setResponse({ status: res.status, data: { success: true, message: "All data forcefully cleaned!" } })
+        await checkStorageInfo() // Refresh storage info
+        setResponse({ 
+          status: res.status, 
+          data: { 
+            success: true, 
+            message: "All data forcefully cleaned! (Note: In production, this only clears memory storage and will reset on next deploy)" 
+          } 
+        })
       } else {
         setResponse({ status: res.status, data })
       }
@@ -113,6 +132,49 @@ export default function DebugPage() {
                 </div>
               ) : (
                 <div>Loading environment check...</div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Storage Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>💾 Storage Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {storageInfo ? (
+                <div className="space-y-2">
+                  {storageInfo.error ? (
+                    <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded border border-red-200 dark:border-red-800">
+                      {storageInfo.error}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Badge variant={storageInfo.storageInfo?.canWriteToFileSystem ? "default" : "secondary"}>
+                            File System: {storageInfo.storageInfo?.canWriteToFileSystem ? "✅ Writable" : "❌ Read-Only"}
+                          </Badge>
+                        </div>
+                        <div>
+                          <Badge variant={storageInfo.storageInfo?.usingMemoryMode ? "secondary" : "default"}>
+                            Storage Mode: {storageInfo.storageInfo?.storageType || "Unknown"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <strong>Data Location:</strong> {storageInfo.storageInfo?.dataLocation || "Unknown"}
+                      </div>
+                      {storageInfo.storageInfo?.usingMemoryMode && (
+                        <div className="text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800 text-sm">
+                          ⚠️ Using memory storage - data will be lost on deployment restart
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>Loading storage information...</div>
               )}
             </CardContent>
           </Card>
