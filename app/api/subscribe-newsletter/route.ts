@@ -36,12 +36,17 @@ export async function POST(request: Request) {
     }
 
     if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-      console.error('Missing email configuration');
+      console.error('Missing email configuration:', {
+        hasEmailUser: !!process.env.EMAIL_USER,
+        hasEmailPassword: !!process.env.EMAIL_APP_PASSWORD
+      });
       return NextResponse.json(
         { success: false, error: 'Email service temporarily unavailable' },
         { status: 500 }
       );
     }
+
+    console.log('Creating email transporter...');
 
     // Create transporter
     const transporter = nodemailer.createTransport({
@@ -52,39 +57,64 @@ export async function POST(request: Request) {
       },
     });
 
-    await transporter.verify();
+    console.log('Verifying transporter...');
+    try {
+      await transporter.verify();
+      console.log('Transporter verified successfully');
+    } catch (verifyError) {
+      console.error('Transporter verification failed:', verifyError);
+      return NextResponse.json(
+        { success: false, error: 'Email service configuration error' },
+        { status: 500 }
+      );
+    }
 
     // Get request headers for tracking
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
+    console.log('Adding subscriber to storage...');
     // Save subscriber to storage
-    await addSubscriber({
-      email,
-      subscribedAt: new Date().toISOString(),
-      ip,
-      userAgent
-    });
+    try {
+      await addSubscriber({
+        email,
+        subscribedAt: new Date().toISOString(),
+        ip,
+        userAgent
+      });
+      console.log('Subscriber added successfully');
+    } catch (storageError) {
+      console.error('Failed to add subscriber to storage:', storageError);
+      // Continue with email sending even if storage fails
+    }
 
+    console.log('Sending notification email...');
     // 1. Send notification to you
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: 'kibeenock7390@gmail.com',
-      subject: '🎉 New Blog Newsletter Subscriber',
-      html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
-          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
-            <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
-              <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: 'kibeenock7390@gmail.com',
+        subject: '🎉 New Blog Newsletter Subscriber',
+        html: `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
+              <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+              </div>
+              <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
             </div>
-            <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
           </div>
-        </div>
-      `,
-    });
+        `,
+      });
+      console.log('Notification email sent successfully');
+    } catch (notificationError) {
+      console.error('Failed to send notification email:', notificationError);
+      // Continue with welcome email even if notification fails
+    }
 
+    console.log('Sending welcome email...');
     // 2. Send beautiful welcome email to subscriber
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -193,6 +223,7 @@ export async function POST(request: Request) {
         </html>
       `,
     });
+    console.log('Welcome email sent successfully');
 
     return NextResponse.json({ 
       success: true, 
@@ -201,10 +232,24 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Newsletter subscription error:', error);
+    
+    // Provide more specific error messages based on the error type
+    let errorMessage = 'Failed to process subscription. Please try again later.';
+    
+    if (error instanceof Error) {
+      if (error.message.includes('Invalid login')) {
+        errorMessage = 'Email service configuration error. Please contact support.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timeout. Please check your connection and try again.';
+      } else if (error.message.includes('Network')) {
+        errorMessage = 'Network error. Please try again in a moment.';
+      }
+    }
+    
     return NextResponse.json(
       { 
         success: false,
-        error: 'Failed to process subscription. Please try again later.'
+        error: errorMessage
       },
       { status: 500 }
     );
