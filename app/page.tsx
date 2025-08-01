@@ -8,6 +8,7 @@ import Image from "next/image"
 import { QuoteDisplay } from "@/components/quote-display"
 import { AnimatedText } from "@/components/animated-text"
 import { CVPreview } from "@/components/cv-preview"
+import { WelcomeCarousel } from "@/components/welcome-carousel"
 import { useState } from "react"
 import { AnimatedEmoji } from "@/components/animated-emoji"
 import { motion, AnimatePresence } from "framer-motion"
@@ -19,6 +20,9 @@ export default function Home() {
   return (
     <PageContainer>
       <section className="container pt-32 pb-20 md:pt-40 md:pb-32">
+        {/* Welcome Carousel */}
+        <WelcomeCarousel />
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 fade-in">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight group">

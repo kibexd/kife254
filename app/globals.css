@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* Darker light theme colors for reduced eye strain */
-    --background: 40 25% 88%;
-    --foreground: 20 10% 10%;
+    /* Better contrast light theme colors */
+    --background: 0 0% 98%;
+    --foreground: 220 10% 5%;
 
-    --card: 40 15% 90%;
-    --card-foreground: 20 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 10% 5%;
 
-    --popover: 40 25% 88%;
-    --popover-foreground: 20 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 10% 5%;
 
-    --primary: 20 10% 9%;
-    --primary-foreground: 40 25% 88%;
+    --primary: 220 90% 30%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 40 10% 84%;
-    --secondary-foreground: 20 10% 9%;
+    --secondary: 220 15% 95%;
+    --secondary-foreground: 220 10% 15%;
 
-    --muted: 40 10% 84%;
-    --muted-foreground: 20 10% 45%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 220 8% 40%;
 
-    --accent: 40 10% 84%;
-    --accent-foreground: 20 10% 9%;
+    --accent: 220 15% 95%;
+    --accent-foreground: 220 10% 15%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 40 25% 94%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 20 10% 82%;
-    --input: 20 10% 82%;
-    --ring: 20 10% 70%;
+    --border: 220 15% 85%;
+    --input: 220 15% 90%;
+    --ring: 220 90% 50%;
 
     --radius: 0.5rem;
   }
@@ -740,4 +740,45 @@ html.dark {
   box-shadow: 
     0 0 10px rgba(var(--illumination-glow-color), 0.7),
     0 0 20px rgba(var(--illumination-glow-color), 0.4);
+}
+
+/* Handle browser extension modifications (Dark Reader, etc.) */
+/* These rules help prevent visual glitches from browser extensions */
+svg[data-darkreader-inline-stroke],
+svg[data-darkreader-inline-fill],
+svg[data-darkreader-inline-color] {
+  /* Ensure extensions don't break our styling */
+  transition: none !important;
+}
+
+/* Prevent layout shifts from extension modifications */
+svg {
+  /* Ensure stable sizing regardless of extension modifications */
+  box-sizing: border-box;
+}
+
+/* Hide extension-specific attributes from affecting layout */
+[data-darkreader-inline-stroke],
+[data-darkreader-inline-fill],
+[data-darkreader-inline-color] {
+  /* Maintain original styling intentions */
+  color: inherit !important;
+}
+
+/* Specific handling for extension-modified elements */
+.extension-modified {
+  /* Ensure extensions don't break layout */
+  position: relative !important;
+  /* Prevent extension styles from overriding important layouts */
+  display: inline !important;
+}
+
+/* Improve compatibility with browser extensions */
+svg.lucide {
+  /* Ensure Lucide icons maintain their intended appearance */
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
 }
