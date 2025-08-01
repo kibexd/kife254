@@ -1,0 +1,212 @@
+import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
+import { isEmailSubscribed, addSubscriber } from '@/lib/subscribers';
+
+export async function POST(request: Request) {
+  try {
+    const { email } = await request.json();
+
+    if (!email) {
+      return NextResponse.json(
+        { success: false, error: 'Email is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // Check if email is already subscribed
+    const alreadySubscribed = await isEmailSubscribed(email);
+    if (alreadySubscribed) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'already_subscribed',
+          message: "Hey there! 👋 Looks like you're already part of my awesome community! I'd love to have you twice, but once is perfect. Keep an eye on your inbox for amazing content coming your way! 🚀"
+        },
+        { status: 409 }
+      );
+    }
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.error('Missing email configuration');
+      return NextResponse.json(
+        { success: false, error: 'Email service temporarily unavailable' },
+        { status: 500 }
+      );
+    }
+
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_APP_PASSWORD,
+      },
+    });
+
+    await transporter.verify();
+
+    // Get request headers for tracking
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    // Save subscriber to storage
+    await addSubscriber({
+      email,
+      subscribedAt: new Date().toISOString(),
+      ip,
+      userAgent
+    });
+
+    // 1. Send notification to you
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: 'kibeenock7390@gmail.com',
+      subject: '🎉 New Blog Newsletter Subscriber',
+      html: `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
+              <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+            </div>
+            <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
+          </div>
+        </div>
+      `,
+    });
+
+    // 2. Send beautiful welcome email to subscriber
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "🎉 Welcome to My Tech Journey!",
+      html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to Our Newsletter</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background-color: #f8fafc; line-height: 1.6;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+            
+            <!-- Header with gradient -->
+            <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 40px 30px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;">
+                Welcome to My Journey! 🎉
+              </h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 15px 0 0 0; font-size: 16px;">
+                Thanks for joining me on this tech adventure
+              </p>
+            </div>
+            
+            <!-- Main content -->
+            <div style="padding: 40px 30px;">
+              <div style="text-align: center; margin-bottom: 35px;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);">
+                  <span style="font-size: 28px;">✨</span>
+                </div>
+                <h2 style="color: #1e293b; margin: 0 0 15px 0; font-size: 22px; font-weight: 600;">
+                  You're all set!
+                </h2>
+                <p style="color: #64748b; font-size: 16px; line-height: 1.7; margin: 0;">
+                  Hey there! 👋<br><br>
+                  I'm genuinely excited to have you join me on this journey! You've just subscribed to my personal space where I share insights from my world of development, cybersecurity, and life lessons learned along the way.
+                </p>
+              </div>
+              
+              <!-- What to expect -->
+              <div style="background: #f8fafc; border-radius: 12px; padding: 30px; margin: 35px 0; border-left: 4px solid #4f46e5;">
+                <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
+                  � What you can expect
+                </h3>
+                <div style="color: #64748b; font-size: 15px; line-height: 1.7;">
+                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span><strong style="color: #374151;">Web Development insights</strong> - Modern techniques, frameworks, and best practices</span>
+                  </div>
+                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span><strong style="color: #374151;">Cybersecurity guidance</strong> - Protecting your digital world with practical tips</span>
+                  </div>
+                  <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
+                    <span style="margin-right: 10px; margin-top: 2px;">⚙️</span>
+                    <span><strong style="color: #374151;">ERP & Business Solutions</strong> - Streamlining business processes effectively</span>
+                  </div>
+                  <div style="display: flex; align-items: flex-start;">
+                    <span style="margin-right: 10px; margin-top: 2px;">💡</span>
+                    <span><strong style="color: #374151;">Industry trends</strong> - What's shaping the future of technology</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Personal note -->
+              <div style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); border-radius: 12px; padding: 25px; margin: 35px 0; text-align: center;">
+                <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0; font-style: italic;">
+                  "I believe in sharing knowledge that makes a real difference. Every piece of content I create is designed to help you grow, solve problems, and stay ahead in this fast-evolving tech landscape."
+                </p>
+                <p style="color: #64748b; font-size: 14px; margin: 15px 0 0 0; font-weight: 500;">
+                  - Enock Kibe
+                </p>
+              </div>
+              
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 40px 0;">
+                <a href="https://your-blog-url.com" style="display: inline-block; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; text-decoration: none; padding: 14px 30px; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); transition: transform 0.2s;">
+                  📖 Visit My Blog
+                </a>
+              </div>
+              
+              <!-- Footer message -->
+              <div style="border-top: 1px solid #e2e8f0; padding-top: 25px; text-align: center;">
+                <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0;">
+                  We're working on some exciting content - your first newsletter will arrive soon! 📬<br>
+                  <br>
+                  <em>P.S. Feel free to reply to this email anytime. I read every message!</em>
+                </p>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background: #1e293b; padding: 25px; text-align: center;">
+              <p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px 0;">
+                © 2025 Tech Insights Newsletter. All rights reserved.
+              </p>
+              <p style="color: #64748b; font-size: 11px; margin: 0;">
+                If you didn't subscribe to this newsletter, you can safely ignore this email.
+              </p>
+            </div>
+            
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Successfully subscribed to newsletter' 
+    });
+
+  } catch (error) {
+    console.error('Newsletter subscription error:', error);
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Failed to process subscription. Please try again later.'
+      },
+      { status: 500 }
+    );
+  }
+}

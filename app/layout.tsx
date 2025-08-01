@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LayoutProvider } from "@/contexts/layout-context"
+import { BrowserExtensionHandler } from "@/components/browser-extension-handler"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -56,6 +57,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <BrowserExtensionHandler />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <LayoutProvider>{children}</LayoutProvider>
         </ThemeProvider>

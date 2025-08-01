@@ -10,13 +10,13 @@ import { motion } from "framer-motion"
 
 export default function BlogPage() {
   return (
-    <PageContainer hideFooter={false}>
+    <PageContainer>
       <section className="container pt-32 pb-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 fade-in">
             <h1 className="text-4xl font-bold tracking-tight mb-4">Blog</h1>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Thoughts, insights, and updates on web development, cybersecurity, and more.
+              My thoughts, insights, and updates on web development, cybersecurity, and more.
             </p>
           </div>
 
@@ -218,13 +218,36 @@ function EnhancedNewsletterSubscription() {
   const [email, setEmail] = useState("")
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (email) {
-      console.log("Subscribing email:", email)
-      setIsSubscribed(true)
-      // In a real implementation, you would send this to your backend
+    if (!email) return
+    
+    setIsLoading(true)
+    setErrorMessage("")
+    
+    try {
+      const res = await fetch("/api/subscribe-newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      
+      const data = await res.json()
+      
+      if (res.ok) {
+        setIsSubscribed(true)
+      } else if (data.error === 'already_subscribed') {
+        setErrorMessage(data.message)
+      } else {
+        setErrorMessage("Oops! Something went wrong. Please try again in a moment.")
+      }
+    } catch (error) {
+      setErrorMessage("Hmm, we're having technical difficulties. Please try again later.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -232,7 +255,7 @@ function EnhancedNewsletterSubscription() {
 
   return (
     <motion.div
-      className="w-full max-w-md bg-card border rounded-lg p-6 shadow-lg"
+      className="w-full max-w-lg bg-card border rounded-lg p-8 shadow-lg"
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -255,10 +278,23 @@ function EnhancedNewsletterSubscription() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="h-10"
+              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full apple-button glow-effect">
-            <Mail className="mr-2 h-4 w-4" /> Subscribe
+          
+          {errorMessage && (
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">{errorMessage}</p>
+            </div>
+          )}
+          
+          <Button 
+            type="submit" 
+            className="w-full apple-button glow-effect" 
+            disabled={isLoading}
+          >
+            <Mail className="mr-2 h-4 w-4" /> 
+            {isLoading ? "Subscribing..." : "Subscribe"}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
             No spam, just updates on new blog posts and tech insights.
@@ -283,6 +319,7 @@ function EnhancedNewsletterSubscription() {
             onClick={() => {
               setIsSubscribed(false)
               setEmail("")
+              setErrorMessage("")
             }}
           >
             Subscribe another email

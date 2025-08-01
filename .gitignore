@@ -1,1 +1,13 @@
 node_modules
+
+# Environment variables
+.env.local
+.env
+
+# Subscriber data (keep private)
+/data/subscribers.json
+
+# Next.js
+.next
+out
+dist
