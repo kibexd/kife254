@@ -185,7 +185,9 @@ __turbopack_context__.s({
     "getRecentSubscribers": (()=>getRecentSubscribers),
     "getSubscriberCount": (()=>getSubscriberCount),
     "getSubscribers": (()=>getSubscribers),
-    "isEmailSubscribed": (()=>isEmailSubscribed)
+    "getSubscribersByStatus": (()=>getSubscribersByStatus),
+    "isEmailSubscribed": (()=>isEmailSubscribed),
+    "updateSubscriberStatus": (()=>updateSubscriberStatus)
 });
 var __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/fs [external] (fs, cjs)");
 var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/path [external] (path, cjs)");
@@ -257,6 +259,25 @@ async function deleteSubscriber(email) {
 async function deleteAllSubscribers() {
     await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify([], null, 2));
 }
+async function updateSubscriberStatus(email, status, emailSent, notificationSent, errorMessage) {
+    const subscribers = await getSubscribers();
+    const subscriberIndex = subscribers.findIndex((sub)=>sub.email.toLowerCase() === email.toLowerCase());
+    if (subscriberIndex !== -1) {
+        subscribers[subscriberIndex] = {
+            ...subscribers[subscriberIndex],
+            status,
+            emailSent: emailSent ?? subscribers[subscriberIndex].emailSent,
+            notificationSent: notificationSent ?? subscribers[subscriberIndex].notificationSent,
+            errorMessage: errorMessage || subscribers[subscriberIndex].errorMessage
+        };
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    }
+}
+async function getSubscribersByStatus(status) {
+    const subscribers = await getSubscribers();
+    if (!status) return subscribers;
+    return subscribers.filter((sub)=>sub.status === status);
+}
 }}),
 "[project]/app/api/subscribe-newsletter/route.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
@@ -305,7 +326,10 @@ async function POST(request) {
             });
         }
         if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-            console.error('Missing email configuration');
+            console.error('Missing email configuration:', {
+                hasEmailUser: !!process.env.EMAIL_USER,
+                hasEmailPassword: !!process.env.EMAIL_APP_PASSWORD
+            });
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
                 success: false,
                 error: 'Email service temporarily unavailable'
@@ -313,6 +337,7 @@ async function POST(request) {
                 status: 500
             });
         }
+        console.log('Creating email transporter...');
         // Create transporter
         const transporter = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$nodemailer$40$7$2e$0$2e$5$2f$node_modules$2f$nodemailer$2f$lib$2f$nodemailer$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].createTransport({
             service: 'gmail',
@@ -321,41 +346,69 @@ async function POST(request) {
                 pass: process.env.EMAIL_APP_PASSWORD
             }
         });
-        await transporter.verify();
+        console.log('Verifying transporter...');
+        try {
+            await transporter.verify();
+            console.log('Transporter verified successfully');
+        } catch (verifyError) {
+            console.error('Transporter verification failed:', verifyError);
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                success: false,
+                error: 'Email service configuration error'
+            }, {
+                status: 500
+            });
+        }
         // Get request headers for tracking
         const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
         const userAgent = request.headers.get('user-agent') || 'unknown';
-        // Save subscriber to storage
+        console.log('Adding subscriber to storage...');
+        // Save subscriber to storage FIRST (before emails) with pending status
         await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["addSubscriber"])({
             email,
             subscribedAt: new Date().toISOString(),
             ip,
-            userAgent
+            userAgent,
+            status: 'pending'
         });
+        console.log('Subscriber added successfully with pending status');
+        console.log('Sending notification email...');
         // 1. Send notification to you
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: 'kibeenock7390@gmail.com',
-            subject: '🎉 New Blog Newsletter Subscriber',
-            html: `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
-          <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
-            <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
-              <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+        let notificationSent = false;
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: 'kibeenock7390@gmail.com',
+                subject: '🎉 New Blog Newsletter Subscriber',
+                html: `
+          <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <h2 style="color: #4F46E5; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">🎉 New Newsletter Subscriber</h2>
+              <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 16px;"><strong style="color: #334155;">Email:</strong> <span style="color: #0f172a;">${email}</span></p>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">Subscribed: ${new Date().toLocaleString()}</p>
+              </div>
+              <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
             </div>
-            <p style="color: #64748b; font-size: 14px; margin: 20px 0 0 0;">Someone just subscribed to your blog newsletter. Time to create amazing content! 🚀</p>
           </div>
-        </div>
-      `
-        });
+        `
+            });
+            notificationSent = true;
+            console.log('Notification email sent successfully');
+        } catch (notificationError) {
+            console.error('Failed to send notification email:', notificationError);
+        // Continue with welcome email even if notification fails
+        }
+        console.log('Sending welcome email...');
         // 2. Send beautiful welcome email to subscriber
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "🎉 Welcome to My Tech Journey!",
-            html: `
+        let emailSent = false;
+        let errorMessage = '';
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: "🎉 Welcome to My Tech Journey!",
+                html: `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -394,20 +447,20 @@ async function POST(request) {
               <!-- What to expect -->
               <div style="background: #f8fafc; border-radius: 12px; padding: 30px; margin: 35px 0; border-left: 4px solid #4f46e5;">
                 <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">
-                  � What you can expect
+                  🎯 What you can expect
                 </h3>
                 <div style="color: #64748b; font-size: 15px; line-height: 1.7;">
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span style="margin-right: 10px; margin-top: 2px;">💻</span>
                     <span><strong style="color: #374151;">Web Development insights</strong> - Modern techniques, frameworks, and best practices</span>
                   </div>
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
-                    <span style="margin-right: 10px; margin-top: 2px;">�</span>
+                    <span style="margin-right: 10px; margin-top: 2px;">🔐</span>
                     <span><strong style="color: #374151;">Cybersecurity guidance</strong> - Protecting your digital world with practical tips</span>
                   </div>
                   <div style="margin-bottom: 12px; display: flex; align-items: flex-start;">
                     <span style="margin-right: 10px; margin-top: 2px;">⚙️</span>
-                    <span><strong style="color: #374151;">ERP & Business Solutions</strong> - Streamlining business processes effectively</span>
+                    <span><strong style="color: #374151;">ERP &amp; Business Solutions</strong> - Streamlining business processes effectively</span>
                   </div>
                   <div style="display: flex; align-items: flex-start;">
                     <span style="margin-right: 10px; margin-top: 2px;">💡</span>
@@ -457,16 +510,48 @@ async function POST(request) {
         </body>
         </html>
       `
-        });
+            });
+            emailSent = true;
+            console.log('Welcome email sent successfully');
+        } catch (welcomeEmailError) {
+            console.error('Failed to send welcome email:', welcomeEmailError);
+            errorMessage = welcomeEmailError instanceof Error ? welcomeEmailError.message : 'Unknown email error';
+        // Continue - subscriber is still saved even if welcome email fails
+        }
+        // Update subscriber status based on email results
+        try {
+            if (emailSent) {
+                await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["updateSubscriberStatus"])(email, 'success', emailSent, notificationSent);
+                console.log(`✅ Subscriber status updated to success for: ${email}`);
+            } else {
+                await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["updateSubscriberStatus"])(email, 'failed', emailSent, notificationSent, errorMessage);
+                console.log(`❌ Subscriber status updated to failed for: ${email}`);
+            }
+        } catch (statusUpdateError) {
+            console.error('Failed to update subscriber status:', statusUpdateError);
+        }
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             success: true,
-            message: 'Successfully subscribed to newsletter'
+            message: emailSent ? 'Successfully subscribed and welcome email sent!' : 'Successfully subscribed! Welcome email will be sent shortly.',
+            emailSent,
+            notificationSent
         });
     } catch (error) {
         console.error('Newsletter subscription error:', error);
+        // Provide more specific error messages based on the error type
+        let errorMessage = 'Failed to process subscription. Please try again later.';
+        if (error instanceof Error) {
+            if (error.message.includes('Invalid login')) {
+                errorMessage = 'Email service configuration error. Please contact support.';
+            } else if (error.message.includes('timeout')) {
+                errorMessage = 'Request timeout. Please check your connection and try again.';
+            } else if (error.message.includes('Network')) {
+                errorMessage = 'Network error. Please try again in a moment.';
+            }
+        }
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             success: false,
-            error: 'Failed to process subscription. Please try again later.'
+            error: errorMessage
         }, {
             status: 500
         });

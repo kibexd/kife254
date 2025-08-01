@@ -260,21 +260,48 @@ export async function POST(request: Request) {
     
     // Provide more specific error messages based on the error type
     let errorMessage = 'Failed to process subscription. Please try again later.';
+    let errorCode = 'UNKNOWN_ERROR';
     
     if (error instanceof Error) {
       if (error.message.includes('Invalid login')) {
         errorMessage = 'Email service configuration error. Please contact support.';
+        errorCode = 'EMAIL_CONFIG_ERROR';
       } else if (error.message.includes('timeout')) {
         errorMessage = 'Request timeout. Please check your connection and try again.';
+        errorCode = 'TIMEOUT_ERROR';
       } else if (error.message.includes('Network')) {
         errorMessage = 'Network error. Please try again in a moment.';
+        errorCode = 'NETWORK_ERROR';
+      } else if (error.message.includes('ENOENT') || error.message.includes('permission')) {
+        errorMessage = 'Storage error. Please contact support.';
+        errorCode = 'STORAGE_ERROR';
       }
     }
+    
+    // Log detailed error for debugging (server-side only)
+    console.error('Detailed error info:', {
+      message: error instanceof Error ? error.message : 'Unknown',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      environment: {
+        hasEmailUser: !!process.env.EMAIL_USER,
+        hasEmailPassword: !!process.env.EMAIL_APP_PASSWORD,
+        platform: process.platform,
+        nodeVersion: process.version
+      }
+    });
     
     return NextResponse.json(
       { 
         success: false,
-        error: errorMessage
+        error: errorMessage,
+        errorCode,
+        // Include more debug info in development
+        ...(process.env.NODE_ENV === 'development' && {
+          debug: {
+            originalError: error instanceof Error ? error.message : 'Unknown error',
+            hasEmailConfig: !!(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD)
+          }
+        })
       },
       { status: 500 }
     );

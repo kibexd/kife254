@@ -81,7 +81,9 @@ __turbopack_context__.s({
     "getRecentSubscribers": (()=>getRecentSubscribers),
     "getSubscriberCount": (()=>getSubscriberCount),
     "getSubscribers": (()=>getSubscribers),
-    "isEmailSubscribed": (()=>isEmailSubscribed)
+    "getSubscribersByStatus": (()=>getSubscribersByStatus),
+    "isEmailSubscribed": (()=>isEmailSubscribed),
+    "updateSubscriberStatus": (()=>updateSubscriberStatus)
 });
 var __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/fs [external] (fs, cjs)");
 var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/path [external] (path, cjs)");
@@ -153,6 +155,25 @@ async function deleteSubscriber(email) {
 async function deleteAllSubscribers() {
     await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify([], null, 2));
 }
+async function updateSubscriberStatus(email, status, emailSent, notificationSent, errorMessage) {
+    const subscribers = await getSubscribers();
+    const subscriberIndex = subscribers.findIndex((sub)=>sub.email.toLowerCase() === email.toLowerCase());
+    if (subscriberIndex !== -1) {
+        subscribers[subscriberIndex] = {
+            ...subscribers[subscriberIndex],
+            status,
+            emailSent: emailSent ?? subscribers[subscriberIndex].emailSent,
+            notificationSent: notificationSent ?? subscribers[subscriberIndex].notificationSent,
+            errorMessage: errorMessage || subscribers[subscriberIndex].errorMessage
+        };
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs__$5b$external$5d$__$28$fs$2c$__cjs$29$__["promises"].writeFile(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+    }
+}
+async function getSubscribersByStatus(status) {
+    const subscribers = await getSubscribers();
+    if (!status) return subscribers;
+    return subscribers.filter((sub)=>sub.status === status);
+}
 }}),
 "[project]/app/api/admin/subscribers/route.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
@@ -207,12 +228,40 @@ async function DELETE(request) {
         const { searchParams } = new URL(request.url);
         const email = searchParams.get('email');
         const deleteAll = searchParams.get('deleteAll');
+        const deleteByStatus = searchParams.get('deleteByStatus');
         if (deleteAll === 'true') {
             // Delete all subscribers
             await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["deleteAllSubscribers"])();
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
                 success: true,
                 message: 'All subscribers deleted successfully'
+            });
+        } else if (deleteByStatus) {
+            // Delete subscribers by status
+            const validStatuses = [
+                'pending',
+                'success',
+                'failed'
+            ];
+            if (!validStatuses.includes(deleteByStatus)) {
+                return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                    success: false,
+                    error: 'Invalid status. Must be pending, success, or failed'
+                }, {
+                    status: 400
+                });
+            }
+            // Get subscribers with the specified status
+            const subscribersToDelete = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getSubscribersByStatus"])(deleteByStatus);
+            // Delete each subscriber
+            let deletedCount = 0;
+            for (const subscriber of subscribersToDelete){
+                const deleted = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$subscribers$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["deleteSubscriber"])(subscriber.email);
+                if (deleted) deletedCount++;
+            }
+            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$15$2e$2$2e$4_react$2d$dom$40$19$2e$1$2e$1_react$40$19$2e$1$2e$1_$5f$react$40$19$2e$1$2e$1$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                success: true,
+                message: `${deletedCount} ${deleteByStatus} subscribers deleted successfully`
             });
         } else if (email) {
             // Delete specific subscriber
