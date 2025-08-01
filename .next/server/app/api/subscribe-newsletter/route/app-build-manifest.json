@@ -1,0 +1,13 @@
+{
+  "pages": {
+    "/api/subscribe-newsletter/route": [
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_76283d51._.js",
+      "static/chunks/39568_next_dist_compiled_c8041c34._.js",
+      "static/chunks/39568_next_dist_client_5dce7355._.js",
+      "static/chunks/39568_next_dist_e02c32b4._.js",
+      "static/chunks/61dca_@swc_helpers_cjs_e27e0aca._.js",
+      "static/chunks/_e69f0d32._.js",
+      "static/chunks/_5aafa2b4._.js"
+    ]
+  }
+}

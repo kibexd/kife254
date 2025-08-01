@@ -1,7 +1,10 @@
 {
-  "/about/page": "app/about/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/subscribers/page": "app/admin/subscribers/page.js",
+  "/api/admin/subscribers/route": "app/api/admin/subscribers/route.js",
+  "/api/send-email/route": "app/api/send-email/route.js",
+  "/api/subscribe-newsletter/route": "app/api/subscribe-newsletter/route.js",
   "/blog/page": "app/blog/page.js",
   "/contact/page": "app/contact/page.js",
-  "/page": "app/page.js",
   "/projects/page": "app/projects/page.js"
 }
