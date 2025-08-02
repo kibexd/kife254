@@ -117,7 +117,7 @@ export default function DebugPage() {
           status: res.status, 
           data: { 
             success: true, 
-            message: "All data forcefully cleaned! (Note: In production, this only clears memory storage and will reset on next deploy)" 
+            message: "All subscriber data cleared from Vercel Blob storage!" 
           } 
         })
       } else {
@@ -186,10 +186,16 @@ export default function DebugPage() {
                       </Badge>
                     </div>
                     <div>
-                      <Badge variant={envCheck.dataDirectory ? "default" : "destructive"}>
-                        Data Dir: {envCheck.dataDirectory ? "✅ Exists" : "❌ Missing"}
+                      <Badge variant={envCheck.blobConfigured ? "default" : "destructive"}>
+                        Blob Storage: {envCheck.blobConfigured ? "✅ Configured" : "❌ Missing Token"}
                       </Badge>
                     </div>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    <strong>Storage Type:</strong> {envCheck.storageType || "unknown"} 
+                    {envCheck.migration && (
+                      <span className="text-green-600 dark:text-green-400"> (migrated from file storage)</span>
+                    )}
                   </div>
                   {envCheck.error && (
                     <div className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800">
@@ -220,21 +226,38 @@ export default function DebugPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Badge variant={storageInfo.storageInfo?.canWriteToFileSystem ? "default" : "secondary"}>
-                            File System: {storageInfo.storageInfo?.canWriteToFileSystem ? "✅ Writable" : "❌ Read-Only"}
+                            File System: {storageInfo.storageInfo?.canWriteToFileSystem ? "✅ Writable" : "❌ Read-Only (Expected)"}
                           </Badge>
                         </div>
                         <div>
-                          <Badge variant={storageInfo.storageInfo?.usingMemoryMode ? "secondary" : "default"}>
-                            Storage Mode: {storageInfo.storageInfo?.storageType || "Unknown"}
+                          <Badge variant={storageInfo.storageInfo?.available ? "default" : "destructive"}>
+                            Cloud Storage: {storageInfo.storageInfo?.available ? "✅ Connected" : "❌ Unavailable"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Badge variant="default">
+                            Storage Mode: {storageInfo.storageInfo?.storageType || "unknown"}
+                          </Badge>
+                        </div>
+                        <div>
+                          <Badge variant="outline">
+                            Blob Count: {storageInfo.storageInfo?.blobCount || 0}
                           </Badge>
                         </div>
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         <strong>Data Location:</strong> {storageInfo.storageInfo?.dataLocation || "Unknown"}
                       </div>
-                      {storageInfo.storageInfo?.usingMemoryMode && (
-                        <div className="text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800 text-sm">
-                          ⚠️ Using memory storage - data will be lost on deployment restart
+                      {!storageInfo.storageInfo?.canWriteToFileSystem && storageInfo.storageInfo?.storageType === 'vercel-blob' && (
+                        <div className="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200 dark:border-green-800 text-sm">
+                          ✅ Production Ready: Using Vercel Blob cloud storage - no file system limitations!
+                        </div>
+                      )}
+                      {storageInfo.storageInfo?.error && (
+                        <div className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800 text-sm">
+                          ⚠️ Storage Issue: {storageInfo.storageInfo.error}
                         </div>
                       )}
                     </div>
@@ -309,7 +332,7 @@ export default function DebugPage() {
                   Refresh Data
                 </Button>
                 <Button onClick={forceCleanData} variant="destructive">
-                  🗑️ Force Clean All Data
+                  🗑️ Clear All Cloud Data
                 </Button>
               </div>
               
@@ -324,31 +347,60 @@ export default function DebugPage() {
             </CardContent>
           </Card>
 
-          {/* Production Troubleshooting */}
+          {/* Production Setup Guide */}
           <Card>
             <CardHeader>
-              <CardTitle>🚨 Production Troubleshooting Guide</CardTitle>
+              <CardTitle>� Production Setup & Troubleshooting</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 text-sm">
                 <div>
-                  <h4 className="font-semibold">Common Production Issues:</h4>
+                  <h4 className="font-semibold mb-2">✅ Current System (Vercel Blob Storage):</h4>
+                  <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded border border-green-200 dark:border-green-800 space-y-2">
+                    <p className="text-green-700 dark:text-green-300"><strong>✅ Production Ready:</strong> Using Vercel Blob cloud storage</p>
+                    <p className="text-green-700 dark:text-green-300"><strong>✅ No File System Issues:</strong> Data persists across deployments</p>
+                    <p className="text-green-700 dark:text-green-300"><strong>✅ Auto-Scaling:</strong> Built on Amazon S3 infrastructure</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">❌ Previous Issues (Now Fixed):</h4>
+                  <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded border border-red-200 dark:border-red-800 space-y-1">
+                    <p className="text-red-700 dark:text-red-300 line-through">❌ Read-only file system errors</p>
+                    <p className="text-red-700 dark:text-red-300 line-through">❌ Data lost on deployments</p>
+                    <p className="text-red-700 dark:text-red-300 line-through">❌ Local file storage limitations</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold">Setup Requirements:</h4>
                   <ul className="list-disc list-inside space-y-1 mt-2">
-                    <li><strong>Environment Variables:</strong> Make sure EMAIL_USER and EMAIL_APP_PASSWORD are set in production</li>
+                    <li><strong>Email Configuration:</strong> EMAIL_USER and EMAIL_APP_PASSWORD environment variables</li>
+                    <li><strong>Vercel Blob:</strong> BLOB_READ_WRITE_TOKEN (auto-generated when you create blob store)</li>
                     <li><strong>Gmail App Password:</strong> Use App Password, not regular Gmail password</li>
-                    <li><strong>File Permissions:</strong> Ensure the app can write to data/subscribers.json</li>
-                    <li><strong>Memory/Storage:</strong> Check if the hosting platform has file write restrictions</li>
-                    <li><strong>CORS Issues:</strong> Verify API routes are accessible from your domain</li>
+                    <li><strong>Vercel Dashboard:</strong> Create blob store named "newsletter-subscribers"</li>
                   </ul>
                 </div>
+                
+                <div>
+                  <h4 className="font-semibold">Quick Setup Steps:</h4>
+                  <ol className="list-decimal list-inside space-y-1 mt-2">
+                    <li>Go to Vercel project → Storage → Connect Database → Blob</li>
+                    <li>Name: "newsletter-subscribers", select all environments</li>
+                    <li>Run: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">vercel env pull</code></li>
+                    <li>Deploy: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">vercel --prod</code></li>
+                  </ol>
+                </div>
+                
                 <div>
                   <h4 className="font-semibold">Deployment Checklist:</h4>
                   <ul className="list-disc list-inside space-y-1 mt-2">
                     <li>✅ EMAIL_USER environment variable set</li>
                     <li>✅ EMAIL_APP_PASSWORD environment variable set</li>
-                    <li>✅ data/ directory exists and is writable</li>
+                    <li>✅ BLOB_READ_WRITE_TOKEN environment variable set (auto-created)</li>
+                    <li>✅ Vercel Blob store created in dashboard</li>
                     <li>✅ Gmail 2FA enabled and App Password generated</li>
-                    <li>✅ API routes deployed and accessible</li>
+                    <li>✅ API routes using cloud storage (not file system)</li>
                   </ul>
                 </div>
               </div>

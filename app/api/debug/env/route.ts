@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server';
-import { existsSync } from 'fs';
-import path from 'path';
 
 export async function GET(request: Request) {
   try {
     // Check environment variables (without exposing sensitive data)
     const emailConfigured = !!(process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD);
     
-    // Check if data directory exists
-    const dataDir = path.join(process.cwd(), 'data');
-    const dataDirectory = existsSync(dataDir);
-    
-    // Check if subscribers.json file exists
-    const subscribersFile = path.join(dataDir, 'subscribers.json');
-    const subscribersFileExists = existsSync(subscribersFile);
+    // Check Vercel Blob configuration (new storage system)
+    const blobConfigured = !!process.env.BLOB_READ_WRITE_TOKEN;
     
     // Production vs Development
     const isProduction = process.env.NODE_ENV === 'production';
@@ -25,16 +18,22 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       emailConfigured,
-      dataDirectory,
-      subscribersFileExists,
+      blobConfigured,
+      storageType: 'vercel-blob', // We're now using Vercel Blob instead of file system
       isProduction,
       platform,
       nodeVersion,
       environment: {
         hasEmailUser: !!process.env.EMAIL_USER,
         hasEmailPassword: !!process.env.EMAIL_APP_PASSWORD,
+        hasBlobToken: !!process.env.BLOB_READ_WRITE_TOKEN,
         hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
         smtpFrom: process.env.SMTP_FROM ? '***configured***' : 'not set'
+      },
+      migration: {
+        from: 'local file storage (data/subscribers.json)',
+        to: 'vercel blob cloud storage',
+        reason: 'Production read-only file system compatibility'
       }
     });
   } catch (error) {
