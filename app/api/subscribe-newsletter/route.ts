@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { isEmailSubscribed, addSubscriber, updateSubscriberStatus } from '@/lib/subscribers';
+import { isEmailSubscribed, addSubscriber, updateSubscriberStatus } from '@/lib/subscribers-blob';
 import { getKenyanTimeString, formatKenyanTimeForEmail } from '@/lib/time-utils';
 
 export async function POST(request: Request) {

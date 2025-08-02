@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStorageInfo } from '@/lib/subscribers'
+import { getStorageInfo } from '@/lib/subscribers-blob'
 
 export async function GET(request: NextRequest) {
   try {

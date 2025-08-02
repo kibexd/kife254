@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSubscribers, getSubscriberCount, getRecentSubscribers, deleteSubscriber, deleteAllSubscribers, getSubscribersByStatus } from '@/lib/subscribers';
+import { getSubscribers, getSubscriberCount, getRecentSubscribers, deleteSubscriber, deleteAllSubscribers, getSubscribersByStatus } from '@/lib/subscribers-blob';
 
 export async function GET(request: Request) {
   try {
