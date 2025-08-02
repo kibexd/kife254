@@ -4,9 +4,9 @@ import { PageContainer } from "@/components/page-container"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Mail, X, CheckCircle } from "lucide-react"
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { Mail, X, CheckCircle, ChevronLeft, ChevronRight, BookOpen, Code, Shield, Users } from "lucide-react"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function BlogPage() {
   return (
@@ -19,6 +19,9 @@ export default function BlogPage() {
               My thoughts, insights, and updates on web development, cybersecurity, and more.
             </p>
           </div>
+
+          {/* Welcome Carousel */}
+          <WelcomeCarousel />
 
           {/* Coming Soon Banner */}
           <div className="mb-16 fade-in" style={{ animationDelay: "0.1s" }}>
@@ -211,6 +214,114 @@ export default function BlogPage() {
         </div>
       </section>
     </PageContainer>
+  )
+}
+
+function WelcomeCarousel() {
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  const slides = [
+    {
+      icon: <BookOpen className="w-12 h-12 text-primary" />,
+      title: "Welcome to My Blog! 📚",
+      description: "Dive into insightful articles about web development, cybersecurity, and ERP systems. Your journey to better tech knowledge starts here.",
+      gradient: "from-blue-500/20 to-purple-500/20"
+    },
+    {
+      icon: <Code className="w-12 h-12 text-primary" />,
+      title: "Full Stack Expertise 💻",
+      description: "Explore cutting-edge web development techniques, best practices, and real-world solutions from my experience as a full-stack developer.",
+      gradient: "from-green-500/20 to-blue-500/20"
+    },
+    {
+      icon: <Shield className="w-12 h-12 text-primary" />,
+      title: "Cybersecurity Insights 🔐",
+      description: "Stay ahead of digital threats with practical cybersecurity tips, security best practices, and insights into protecting your digital assets.",
+      gradient: "from-red-500/20 to-orange-500/20"
+    },
+    {
+      icon: <Users className="w-12 h-12 text-primary" />,
+      title: "Business Central & ERP 🏢",
+      description: "Master Microsoft Dynamics 365 Business Central with expert insights, implementation strategies, and business automation solutions.",
+      gradient: "from-purple-500/20 to-pink-500/20"
+    }
+  ]
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+  }
+
+  // Auto-advance slides
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 4000)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="mb-12 fade-in">
+      <Card className="overflow-hidden border-primary/20 relative">
+        <div className={`relative aspect-[21/9] bg-gradient-to-r ${slides[currentSlide].gradient}`}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -300 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center"
+            >
+              <div className="mb-6">
+                {slides[currentSlide].icon}
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                {slides[currentSlide].title}
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mb-6">
+                {slides[currentSlide].description}
+              </p>
+              
+              {/* Slide indicators */}
+              <div className="flex gap-2 mb-4">
+                {slides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide 
+                        ? 'bg-primary scale-110' 
+                        : 'bg-primary/30 hover:bg-primary/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation arrows */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background/90 backdrop-blur-sm"
+            onClick={prevSlide}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-background/80 hover:bg-background/90 backdrop-blur-sm"
+            onClick={nextSlide}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
+      </Card>
+    </div>
   )
 }
 

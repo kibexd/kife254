@@ -1,9 +1,4 @@
 {
-  "/admin/subscribers/page": "app/admin/subscribers/page.js",
-  "/api/admin/subscribers/route": "app/api/admin/subscribers/route.js",
-  "/api/debug/env/route": "app/api/debug/env/route.js",
-  "/api/debug/storage/route": "app/api/debug/storage/route.js",
-  "/api/subscribe-newsletter/route": "app/api/subscribe-newsletter/route.js",
   "/blog/page": "app/blog/page.js",
-  "/debug/page": "app/debug/page.js"
+  "/page": "app/page.js"
 }
