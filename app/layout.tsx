@@ -4,7 +4,12 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LayoutProvider } from "@/contexts/layout-context"
+import { LoadingProvider } from "@/contexts/loading-context"
 import { BrowserExtensionHandler } from "@/components/browser-extension-handler"
+import { PageLoaderWrapper } from "@/components/page-loader-wrapper"
+import { NavigationHandler } from "@/components/navigation-handler"
+import { SmoothScrolling } from "@/components/smooth-scrolling"
+import { CursorFollower } from "@/components/cursor-follower"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
@@ -58,9 +63,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <BrowserExtensionHandler />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <LayoutProvider>{children}</LayoutProvider>
-        </ThemeProvider>
+        <LoadingProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+            <LayoutProvider>
+              <NavigationHandler />
+              <CursorFollower />
+              <SmoothScrolling />
+              <PageLoaderWrapper />
+              {children}
+            </LayoutProvider>
+          </ThemeProvider>
+        </LoadingProvider>
       </body>
     </html>
   )

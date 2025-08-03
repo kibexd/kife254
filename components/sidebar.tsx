@@ -155,7 +155,8 @@ export function Sidebar() {
     )}>
       <div className="p-6 flex flex-col items-center">
         <div
-          className="relative w-32 h-32 overflow-hidden rounded-2xl mb-4 profile-image-container"
+          className="relative w-32 h-32 overflow-hidden rounded-2xl mb-4 profile-image-container glitch-border-hover border-2"
+          style={{ isolation: "isolate" }}
           onMouseEnter={() => setIsImageHovered(true)}
           onMouseLeave={() => setIsImageHovered(false)}
         >
@@ -163,11 +164,31 @@ export function Sidebar() {
             {isImageHovered ? (
               <motion.div
                 key="alternate-profile"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-                className="absolute inset-0"
+                initial={{ 
+                  opacity: 0, 
+                  scale: 0.9,
+                  rotateY: 180,
+                  filter: "hue-rotate(0deg)"
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  rotateY: 0,
+                  filter: "hue-rotate(360deg)"
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  scale: 0.9,
+                  rotateY: -180,
+                  filter: "hue-rotate(0deg)"
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  type: "spring",
+                  stiffness: 250,
+                  damping: 25
+                }}
+                className="absolute inset-0 glitch-pulse"
               >
                 <img
                   src="/dp1.jpg"
@@ -178,14 +199,34 @@ export function Sidebar() {
             ) : (
               <motion.div
                 key="main-profile"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
+                initial={{ 
+                  opacity: 0, 
+                  scale: 0.9,
+                  rotateY: 180,
+                  filter: "hue-rotate(0deg)"
+                }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  rotateY: 0,
+                  filter: "hue-rotate(0deg)"
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  scale: 0.9,
+                  rotateY: 180,
+                  filter: "hue-rotate(180deg)"
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  type: "spring",
+                  stiffness: 250,
+                  damping: 25
+                }}
                 className="absolute inset-0"
               >
                 <img
-                  src="/kife2.png"
+                  src="/dpp2.jpg"
                   alt="Enock Kibe"
                   className="w-full h-full object-cover profile-image"
                 />

@@ -347,6 +347,50 @@ export default function DebugPage() {
             </CardContent>
           </Card>
 
+          {/* Blob Storage Test */}
+          <Card>
+            <CardHeader>
+              <CardTitle>🧪 Vercel Blob Storage Test</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/debug/blob?action=storage-info')
+                      const data = await res.json()
+                      setResponse({ status: res.status, data })
+                    } catch (error) {
+                      setResponse({ error: error instanceof Error ? error.message : 'Failed to check storage' })
+                    }
+                  }} 
+                  variant="outline"
+                >
+                  Check Storage Status
+                </Button>
+                <Button 
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/debug/blob?action=test-add')
+                      const data = await res.json()
+                      setResponse({ status: res.status, data })
+                      // Refresh subscribers data
+                      await fetchSubscribers()
+                    } catch (error) {
+                      setResponse({ error: error instanceof Error ? error.message : 'Failed to test storage' })
+                    }
+                  }} 
+                  variant="outline"
+                >
+                  Test Add Subscriber
+                </Button>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Use these buttons to test if Vercel Blob storage is working correctly. The test will add a dummy subscriber and verify data persistence.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Production Setup Guide */}
           <Card>
             <CardHeader>

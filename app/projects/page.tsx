@@ -167,8 +167,8 @@ export default function ProjectsPage() {
       <section className="container pt-32 pb-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 fade-in">
-            <h1 className="text-4xl font-bold tracking-tight mb-4">Projects</h1>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <h1 className="text-4xl font-bold tracking-tight mb-4 hover:cyber-glitch transition-all duration-300 cursor-pointer">Projects</h1>
+            <p className="text-muted-foreground max-w-md mx-auto hover:text-primary transition-colors duration-300">
               A showcase of my work across web development and systems development.
             </p>
           </div>
@@ -264,18 +264,18 @@ export default function ProjectsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card className="overflow-hidden hover-lift hover-image-container project-card">
+                    <Card className="overflow-hidden hover-lift hover-image-container project-card border-2 glitch-border-hover group transition-all duration-300 hover:shadow-xl">
                       {project.status === "upcoming" && (
-                        <div className="absolute top-4 right-4 z-10 bg-primary text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full">
+                        <div className="absolute top-4 right-4 z-10 bg-primary text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full cyber-glitch">
                           Coming Soon
                         </div>
                       )}
-                      <div className="aspect-video relative">
+                      <div className="aspect-video relative overflow-hidden">
                         <Image
                           src={project.image || "/placeholder.svg"}
                           alt={project.title}
                           fill
-                          className="object-cover hover-image"
+                          className="object-cover hover-image transition-transform duration-500 group-hover:scale-110"
                         />
                       </div>
                       <CardContent className="p-6">

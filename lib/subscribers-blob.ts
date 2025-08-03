@@ -18,25 +18,33 @@ export interface Subscriber {
 export async function getSubscribers(): Promise<Subscriber[]> {
   try {
     // List all blobs and find our subscribers file
-    const { blobs } = await list()
+    const { blobs } = await list({ prefix: 'subscribers/' })
     const subscribersBlob = blobs.find(blob => blob.pathname === SUBSCRIBERS_BLOB_PATHNAME)
     
     if (!subscribersBlob) {
-      // If no file exists, return empty array (first time setup)
+      // If no file exists, create an empty one and return empty array
+      console.log('📝 No subscribers file found, creating initial empty file')
+      await put(SUBSCRIBERS_BLOB_PATHNAME, JSON.stringify([], null, 2), {
+        access: 'public',
+        allowOverwrite: true,
+        contentType: 'application/json'
+      })
       return []
     }
 
     // Fetch the JSON data from the blob URL
     const response = await fetch(subscribersBlob.url)
     if (!response.ok) {
-      console.error('Failed to fetch subscribers data:', response.statusText)
+      console.error('❌ Failed to fetch subscribers data:', response.statusText)
       return []
     }
 
     const data = await response.json()
-    return Array.isArray(data) ? data : []
+    const subscribers = Array.isArray(data) ? data : []
+    console.log(`✅ Retrieved ${subscribers.length} subscribers from Vercel Blob`)
+    return subscribers
   } catch (error) {
-    console.error('Error getting subscribers from Vercel Blob:', error)
+    console.error('❌ Error getting subscribers from Vercel Blob:', error)
     return []
   }
 }
@@ -52,6 +60,7 @@ export async function isEmailSubscribed(email: string): Promise<boolean> {
 // Add new subscriber to Vercel Blob
 export async function addSubscriber(subscriber: Subscriber): Promise<void> {
   try {
+    console.log(`📧 Adding subscriber: ${subscriber.email}`)
     const subscribers = await getSubscribers()
     
     // Double-check to prevent duplicates
@@ -60,22 +69,24 @@ export async function addSubscriber(subscriber: Subscriber): Promise<void> {
     )
     
     if (existingSubscriber) {
+      console.log(`⚠️ Subscriber ${subscriber.email} already exists`)
       throw new Error('Email already subscribed')
     }
     
     // Add new subscriber
     subscribers.push(subscriber)
+    console.log(`📝 Adding to list, total will be: ${subscribers.length}`)
     
     // Convert to JSON and store in Vercel Blob
     const jsonData = JSON.stringify(subscribers, null, 2)
     
-    await put(SUBSCRIBERS_BLOB_PATHNAME, jsonData, {
+    const result = await put(SUBSCRIBERS_BLOB_PATHNAME, jsonData, {
       access: 'public',
       allowOverwrite: true, // Allow updating the existing file
       contentType: 'application/json'
     })
     
-    console.log('✅ Subscriber added to Vercel Blob successfully')
+    console.log('✅ Subscriber added to Vercel Blob successfully:', result.url)
   } catch (error) {
     console.error('❌ Error adding subscriber to Vercel Blob:', error)
     throw error

@@ -648,7 +648,10 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 fade-in" style={{ animationDelay: "0.2s" }}>
             <div
-              className="relative w-full max-w-md h-[400px] mx-auto profile-image-container rounded-3xl overflow-hidden border"
+              className="relative w-full max-w-md h-[400px] mx-auto profile-image-container rounded-3xl overflow-hidden border-2 glitch-border-hover"
+              style={{ 
+                isolation: "isolate"
+              }}
               onMouseEnter={() => setIsImageHovered(true)}
               onMouseLeave={() => setIsImageHovered(false)}
             >
@@ -656,11 +659,26 @@ export default function AboutPage() {
                 {isImageHovered ? (
                   <motion.div
                     key="alternate-image"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
-                    className="absolute inset-0"
+                    initial={{ 
+                      opacity: 0, 
+                      scale: 1.05,
+                      rotateY: 90
+                    }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      rotateY: 0
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.95,
+                      rotateY: -90
+                    }}
+                    transition={{ 
+                      duration: 0.4,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
+                    className="absolute inset-0 glitch-pulse"
                   >
                     <img
                       src="/dp3.jpg"
@@ -671,10 +689,25 @@ export default function AboutPage() {
                 ) : (
                   <motion.div
                     key="main-image"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 2, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.3 }}
+                    initial={{ 
+                      opacity: 0, 
+                      scale: 1.05,
+                      rotateY: 90
+                    }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      rotateY: 0
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.95,
+                      rotateY: -90
+                    }}
+                    transition={{ 
+                      duration: 0.4,
+                      ease: [0.25, 0.46, 0.45, 0.94]
+                    }}
                     className="absolute inset-0"
                   >
                     <img

@@ -4,8 +4,9 @@ import { PageContainer } from "@/components/page-container"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Users, Calendar, Download, RefreshCw, LogOut, Trash2, AlertTriangle } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Input } from "@/components/ui/input"
+import { Mail, Users, Calendar, Download, Upload, RefreshCw, LogOut, Trash2, AlertTriangle } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
 import { LoginPage } from "@/components/admin-login"
 import { formatKenyanTime } from "@/lib/time-utils"
 
@@ -31,6 +32,9 @@ export default function AdminSubscribersPage() {
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
   const [showDeleteByStatusDialog, setShowDeleteByStatusDialog] = useState<'success' | 'pending' | 'failed' | null>(null)
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'success' | 'failed'>('all')
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<{ success: number; errors: string[] } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Check authentication on mount
   useEffect(() => {
@@ -112,6 +116,94 @@ export default function AdminSubscribersPage() {
     a.download = `newsletter-subscribers-${statusFilter}-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     window.URL.revokeObjectURL(url)
+  }
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      setError("Please select a CSV file")
+      return
+    }
+
+    setImporting(true)
+    setImportResult(null)
+    setError("")
+
+    try {
+      const text = await file.text()
+      const lines = text.split('\\n').filter(line => line.trim())
+      
+      if (lines.length < 2) {
+        setError("CSV file must have at least a header and one data row")
+        return
+      }
+
+      const header = lines[0].toLowerCase()
+      const emailColumnIndex = header.split(',').findIndex(col => 
+        col.includes('email')
+      )
+
+      if (emailColumnIndex === -1) {
+        setError("CSV file must have an 'Email' column")
+        return
+      }
+
+      const importErrors: string[] = []
+      let successCount = 0
+
+      // Process each row (skip header)
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(',').map(cell => cell.replace(/"/g, '').trim())
+        const email = row[emailColumnIndex]
+
+        if (!email || !email.includes('@')) {
+          importErrors.push(`Row ${i + 1}: Invalid email format`)
+          continue
+        }
+
+        try {
+          // Add subscriber via API
+          const res = await fetch('/api/subscribe-newsletter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, source: 'csv-import' })
+          })
+
+          if (res.ok) {
+            successCount++
+          } else {
+            const data = await res.json()
+            if (data.error?.includes('already subscribed')) {
+              importErrors.push(`Row ${i + 1}: ${email} already subscribed`)
+            } else {
+              importErrors.push(`Row ${i + 1}: Failed to import ${email}`)
+            }
+          }
+        } catch (error) {
+          importErrors.push(`Row ${i + 1}: Error importing ${email}`)
+        }
+      }
+
+      setImportResult({ success: successCount, errors: importErrors })
+      
+      // Refresh the subscribers list
+      await fetchSubscribers()
+
+    } catch (error) {
+      setError("Failed to read CSV file")
+    } finally {
+      setImporting(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
   }
 
   const deleteSubscriber = async (email: string) => {
@@ -235,6 +327,17 @@ export default function AdminSubscribersPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV ({statusFilter})
               </Button>
+              <Button onClick={handleImportClick} variant="outline" size="sm" disabled={importing}>
+                <Upload className="mr-2 h-4 w-4" />
+                {importing ? 'Importing...' : 'Import CSV'}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFileImport}
+                style={{ display: 'none' }}
+              />
               <Button 
                 onClick={() => setShowDeleteAllDialog(true)} 
                 variant="destructive" 
@@ -377,6 +480,43 @@ export default function AdminSubscribersPage() {
                 }
               </CardTitle>
             </CardHeader>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mx-6 mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-600">{error}</p>
+              </div>
+            )}
+
+            {/* Import Result */}
+            {importResult && (
+              <div className="mx-6 mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">Import Results</h4>
+                <p className="text-green-600">✅ Successfully imported: {importResult.success} subscribers</p>
+                {importResult.errors.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-orange-600">⚠️ {importResult.errors.length} issues encountered:</p>
+                    <ul className="text-sm text-orange-600 mt-1 ml-4 list-disc max-h-32 overflow-y-auto">
+                      {importResult.errors.slice(0, 10).map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                      {importResult.errors.length > 10 && (
+                        <li>... and {importResult.errors.length - 10} more</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+                <Button 
+                  onClick={() => setImportResult(null)} 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                >
+                  Dismiss
+                </Button>
+              </div>
+            )}
+
             <CardContent>
               {loading ? (
                 <div className="flex items-center justify-center py-8">

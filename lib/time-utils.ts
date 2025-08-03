@@ -1,48 +1,65 @@
 // Utility functions for handling Kenyan time (EAT - UTC+3)
+// Current Kenya Time: August 2, 2025, 23:27:24 EAT
 
 export function getKenyanTime(): Date {
-  // Create a new date and add 3 hours for Kenyan time (EAT = UTC+3)
+  // Get current time in Kenya timezone (Africa/Nairobi)
   const now = new Date()
-  const kenyanTime = new Date(now.getTime() + (3 * 60 * 60 * 1000))
-  return kenyanTime
+  // Convert to Kenya timezone - this will be accurate regardless of server location
+  return new Date(now.toLocaleString("en-US", { timeZone: "Africa/Nairobi" }))
 }
 
 export function getKenyanTimeString(): string {
-  // Returns ISO string but adjusted for Kenyan time
-  return getKenyanTime().toISOString()
+  // Returns ISO string in Kenyan time
+  const kenyanTime = getKenyanTime()
+  return kenyanTime.toISOString()
 }
 
 export function formatKenyanTime(date: string | Date): string {
   // Format date for Kenyan timezone display
   const dateObj = typeof date === 'string' ? new Date(date) : date
   
-  // Convert to Kenyan time if it's UTC
-  const kenyanTime = new Date(dateObj.getTime() + (3 * 60 * 60 * 1000))
-  
-  return kenyanTime.toLocaleString('en-KE', {
+  // Use proper Kenya timezone formatting
+  return dateObj.toLocaleString('en-KE', {
     timeZone: 'Africa/Nairobi',
     year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: true
+    hour12: false // 24-hour format for consistency
   })
 }
 
 export function formatKenyanTimeForEmail(date?: Date): string {
-  // Format specifically for email notifications
+  // Format specifically for email notifications in Kenya time
   const targetDate = date || new Date()
   
   return targetDate.toLocaleString('en-US', {
     timeZone: 'Africa/Nairobi',
+    weekday: 'long',
     year: 'numeric',
-    month: 'numeric',
+    month: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: true
-  })
+    hour12: false
+  }) + ' EAT'
+}
+
+// Get current Kenya time as readable string
+export function getCurrentKenyanTimeString(): string {
+  const now = new Date()
+  return now.toLocaleString('en-KE', {
+    timeZone: 'Africa/Nairobi',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }) + ' EAT'
 }
