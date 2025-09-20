@@ -5,8 +5,12 @@ import Link from "next/link"
 export function Logo() {
   return (
     <Link href="/" className="flex items-center space-x-2">
-      <div className="bg-sky-200 p-2 rounded-md dark:bg-sky-900">
-        <span className="font-semibold text-sky-800 dark:text-sky-200">Enock</span>
+      <div className="logo-container relative cursor-pointer">
+        <div className="logo-hail"></div>
+        <div className="logo-hail2"></div>
+        <div className="bg-sky-200 p-2 rounded-md dark:bg-sky-900 relative z-10">
+          <span className="font-semibold text-sky-800 dark:text-sky-200">Enock</span>
+        </div>
       </div>
 
       {/* 

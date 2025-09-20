@@ -5,6 +5,7 @@ import { useLayout } from "@/contexts/layout-context"
 import { Sidebar } from "@/components/sidebar"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
+import { MarqueeBanner } from "@/components/marquee-banner"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
@@ -27,12 +28,13 @@ export function PageContainer({ children, className }: PageContainerProps) {
         )}
         data-illumination={isIlluminated ? "on" : "off"}
       >
+        <MarqueeBanner />
         <Sidebar />
         <div className={cn(
-          "flex-1 flex flex-col sidebar-content",
+          "flex-1 flex flex-col sidebar-content min-h-screen",
           sidebarSide === "left" ? "ml-64" : "mr-64"
         )}>
-          <main className="flex-1 pt-0">{children}</main>
+          <main className="flex-1 pt-0 min-h-screen">{children}</main>
           <Footer className="w-full" />
         </div>
       </div>

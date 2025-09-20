@@ -9,6 +9,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState, useRef } from "react"
 import { motion, useInView } from "framer-motion"
+import { CharShuffle } from "@/components/char-shuffle"
 
 interface Project {
   title: string;
@@ -164,11 +165,11 @@ export default function ProjectsPage() {
 
   return (
     <PageContainer>
-      <section className="container pt-32 pb-20">
+      <section className="container pt-32 pb-20 grainy-background">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 fade-in">
-            <h1 className="text-4xl font-bold tracking-tight mb-4 hover:cyber-glitch transition-all duration-300 cursor-pointer">Projects</h1>
-            <p className="text-muted-foreground max-w-md mx-auto hover:text-primary transition-colors duration-300">
+            <h1 className="text-4xl font-bold tracking-tight mb-4 text-hover cursor-pointer">Projects</h1>
+            <p className="text-muted-foreground max-w-md mx-auto text-hover">
               A showcase of my work across web development and systems development.
             </p>
           </div>
@@ -264,19 +265,20 @@ export default function ProjectsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card className="overflow-hidden hover-lift hover-image-container project-card border-2 glitch-border-hover group transition-all duration-300 hover:shadow-xl">
+                    <Card className="overflow-hidden hover-lift project-card border-2 group transition-all duration-300 hover:shadow-xl grainy-background">
                       {project.status === "upcoming" && (
-                        <div className="absolute top-4 right-4 z-10 bg-primary text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full cyber-glitch">
+                        <div className="absolute top-4 right-4 z-10 bg-primary text-primary-foreground text-xs font-medium px-2.5 py-1 rounded-full">
                           Coming Soon
                         </div>
                       )}
-                      <div className="aspect-video relative overflow-hidden">
+                      <div className="aspect-video relative overflow-hidden sliced-image-container">
                         <Image
                           src={project.image || "/placeholder.svg"}
                           alt={project.title}
                           fill
-                          className="object-cover hover-image transition-transform duration-500 group-hover:scale-110"
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
+                        <div className="sliced-image-overlay"></div>
                       </div>
                       <CardContent className="p-6">
                         <div className="flex justify-between items-start">
@@ -286,7 +288,11 @@ export default function ProjectsPage() {
                                 {project.category}
                               </span>
                             </div>
-                            <h3 className="font-semibold text-lg">{project.title}</h3>
+                            <CharShuffle 
+                              text={project.title} 
+                              className="font-semibold text-lg" 
+                              shuffleType="project"
+                            />
                             <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                             <div className="flex items-center text-xs text-muted-foreground mt-3">
                               <Calendar className="h-3 w-3 mr-1" />
@@ -325,14 +331,15 @@ export default function ProjectsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                   >
-                    <Card className="overflow-hidden hover-lift hover-image-container project-card">
-                      <div className="aspect-video relative">
+                    <Card className="overflow-hidden hover-lift project-card grainy-background">
+                      <div className="aspect-video relative sliced-image-container">
                         <Image
                           src={project.image || "/placeholder.svg"}
                           alt={project.title}
                           fill
-                          className="object-cover hover-image"
+                          className="object-cover"
                         />
+                        <div className="sliced-image-overlay"></div>
                       </div>
                       <CardContent className="p-6">
                         <div className="flex justify-between items-start">
@@ -342,7 +349,11 @@ export default function ProjectsPage() {
                                 {project.category}
                               </span>
                             </div>
-                            <h3 className="font-semibold text-lg">{project.title}</h3>
+                            <CharShuffle 
+                              text={project.title} 
+                              className="font-semibold text-lg" 
+                              shuffleType="project"
+                            />
                             <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                             <div className="flex items-center text-xs text-muted-foreground mt-3">
                               <Calendar className="h-3 w-3 mr-1" />
@@ -401,7 +412,11 @@ export default function ProjectsPage() {
                                 {project.category}
                               </span>
                             </div>
-                            <h3 className="font-semibold text-lg">{project.title}</h3>
+                            <CharShuffle 
+                              text={project.title} 
+                              className="font-semibold text-lg" 
+                              shuffleType="project"
+                            />
                             <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                             <div className="flex items-center text-xs text-muted-foreground mt-3">
                               <Calendar className="h-3 w-3 mr-1" />
@@ -464,7 +479,11 @@ export default function ProjectsPage() {
                                   {project.category}
                                 </span>
                               </div>
-                              <h3 className="font-semibold text-lg">{project.title}</h3>
+                              <CharShuffle 
+                              text={project.title} 
+                              className="font-semibold text-lg" 
+                              shuffleType="project"
+                            />
                               <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                               <div className="flex items-center text-xs text-muted-foreground mt-3">
                                 <Calendar className="h-3 w-3 mr-1" />
@@ -527,7 +546,11 @@ export default function ProjectsPage() {
                                   {project.category}
                                 </span>
                               </div>
-                              <h3 className="font-semibold text-lg">{project.title}</h3>
+                              <CharShuffle 
+                              text={project.title} 
+                              className="font-semibold text-lg" 
+                              shuffleType="project"
+                            />
                               <p className="text-muted-foreground text-sm mt-1">{project.description}</p>
                               <div className="flex items-center text-xs text-muted-foreground mt-3">
                                 <Calendar className="h-3 w-3 mr-1" />

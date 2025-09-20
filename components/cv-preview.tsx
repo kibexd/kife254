@@ -11,8 +11,22 @@ interface CVPreviewProps {
 
 export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[90vw] p-0 overflow-hidden bg-background">
+    <>
+      <style jsx global>{`
+        [data-radix-dialog-overlay] {
+          z-index: 1001 !important;
+          padding-top: 40px !important;
+        }
+        [data-radix-dialog-content] {
+          z-index: 1001 !important;
+          margin-top: 40px !important;
+        }
+      `}</style>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className="max-w-4xl w-[90vw] p-0 overflow-hidden bg-background"
+        style={{ zIndex: 1001, marginTop: '40px' }}
+      >
         <div className="sticky top-0 z-10 flex justify-between items-center p-4 bg-background/80 backdrop-blur-sm border-b">
           <DialogTitle className="text-xl">Enock Kibe - CV Preview</DialogTitle>
           <div className="flex gap-2">
@@ -216,5 +230,6 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
         </div>
       </DialogContent>
     </Dialog>
+    </>
   )
 }

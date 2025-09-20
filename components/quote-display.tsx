@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+// Removed Card import to use simple divs instead
 import { Quote } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -92,8 +92,8 @@ export function QuoteDisplay() {
   // }, [quoteIndex])
 
   return (
-    <Card className="border-none shadow-none bg-transparent">
-      <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="flex flex-col items-center justify-center p-6 text-center w-full">
         <motion.div
           className="mb-4 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"
           animate={{
@@ -116,7 +116,7 @@ export function QuoteDisplay() {
               className="quote-container"
             >
               <motion.blockquote
-                className="text-xl md:text-2xl font-medium mb-4 max-w-2xl"
+                className="text-xl md:text-2xl font-medium mb-4 max-w-2xl mx-auto text-center"
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5 }}
@@ -125,7 +125,7 @@ export function QuoteDisplay() {
               </motion.blockquote>
 
               <motion.cite
-                className="text-muted-foreground block"
+                className="text-muted-foreground block text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
@@ -135,7 +135,7 @@ export function QuoteDisplay() {
             </motion.div>
           )}
         </AnimatePresence>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

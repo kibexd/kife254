@@ -35,6 +35,7 @@ import { CVPreview } from "@/components/cv-preview"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Slider } from "@/components/ui/slider"
+import { HoverImage } from "@/components/hover-image"
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -150,92 +151,19 @@ export function Sidebar() {
 
   return (
     <div className={cn(
-      "h-screen w-64 border-r flex flex-col bg-card fixed top-0 z-40",
-      sidebarSide === "left" ? "left-0 border-r" : "right-0 border-l",
+      "sidebar-fixed w-64 border-r flex flex-col bg-card grainy-background",
+      sidebarSide === "left" ? "left-0 border-r" : "right-0 border-l right",
     )}>
       <div className="p-6 flex flex-col items-center">
-        <div
-          className="relative w-32 h-32 overflow-hidden rounded-2xl mb-4 profile-image-container glitch-border-hover border-2"
+        <HoverImage
+          src="/dpp2.jpg"
+          alt="Enock Kibe"
+          hoverSrc="/dp1.jpg"
+          className="relative w-8 h-8 overflow-hidden rounded-xl mb-4 profile-image-container border-2 aspect-square"
           style={{ isolation: "isolate" }}
-          onMouseEnter={() => setIsImageHovered(true)}
-          onMouseLeave={() => setIsImageHovered(false)}
-        >
-          <AnimatePresence mode="wait">
-            {isImageHovered ? (
-              <motion.div
-                key="alternate-profile"
-                initial={{ 
-                  opacity: 0, 
-                  scale: 0.9,
-                  rotateY: 180,
-                  filter: "hue-rotate(0deg)"
-                }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  rotateY: 0,
-                  filter: "hue-rotate(360deg)"
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  scale: 0.9,
-                  rotateY: -180,
-                  filter: "hue-rotate(0deg)"
-                }}
-                transition={{ 
-                  duration: 0.5,
-                  type: "spring",
-                  stiffness: 250,
-                  damping: 25
-                }}
-                className="absolute inset-0 glitch-pulse"
-              >
-                <img
-                  src="/dp1.jpg"
-                  alt="Enock Kibe - Coding"
-                  className="w-full h-full object-cover profile-image"
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="main-profile"
-                initial={{ 
-                  opacity: 0, 
-                  scale: 0.9,
-                  rotateY: 180,
-                  filter: "hue-rotate(0deg)"
-                }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  rotateY: 0,
-                  filter: "hue-rotate(0deg)"
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  scale: 0.9,
-                  rotateY: 180,
-                  filter: "hue-rotate(180deg)"
-                }}
-                transition={{ 
-                  duration: 0.5,
-                  type: "spring",
-                  stiffness: 250,
-                  damping: 25
-                }}
-                className="absolute inset-0"
-              >
-                <img
-                  src="/dpp2.jpg"
-                  alt="Enock Kibe"
-                  className="w-full h-full object-cover profile-image"
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        <h2 className="font-semibold text-lg">Enock Kibe</h2>
-        <p className="text-xs text-muted-foreground">Full Stack Developer</p>
+        />
+        <h2 className="font-semibold text-lg text-hover">Enock Kibe</h2>
+        <p className="text-xs text-muted-foreground text-hover">Full Stack Developer</p>
 
         <div className="flex gap-3 mt-3">
           <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
@@ -319,8 +247,13 @@ export function Sidebar() {
           </TooltipProvider>
         </div>
 
-        <Button variant="outline" size="sm" className="mt-4 w-full glow-effect" onClick={() => setShowCVPreview(true)}>
-          <Download className="mr-2 h-3 w-3" /> Download CV
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="mt-4 w-full glow-effect apple-button hover:bg-primary hover:text-primary-foreground transition-all duration-300 border-primary/30 hover:border-primary rounded-lg px-4 py-2.5 font-medium" 
+          onClick={() => setShowCVPreview(true)}
+        >
+          <Download className="mr-2 h-4 w-4" /> Download CV
         </Button>
       </div>
 
@@ -335,14 +268,14 @@ export function Sidebar() {
                 <Link
                   href={route.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors icon-link",
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors icon-link text-hover",
                     pathname === route.href
                       ? "bg-accent text-accent-foreground font-medium"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
                   )}
                 >
-                  <Icon className="h-4 w-4" />
-                  {route.label}
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{route.label}</span>
                 </Link>
               </li>
             )

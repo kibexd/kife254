@@ -26,6 +26,7 @@ import { ImageGallery } from "@/components/image-gallery"
 import { VideoPlayer } from "@/components/video-player"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { HoverImage } from "@/components/hover-image"
 
 export default function InterestsPage() {
   const [selectedImage, setSelectedImage] = useState<any>(null)
@@ -295,11 +296,11 @@ export default function InterestsPage() {
 
   return (
     <PageContainer>
-      <section className="container pt-32 pb-20">
+      <section className="container pt-32 pb-20 grainy-background">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 fade-in">
-            <h1 className="text-4xl font-bold tracking-tight mb-4">Interests</h1>
-            <p className="text-muted-foreground max-w-md mx-auto">
+            <h1 className="text-4xl font-bold tracking-tight mb-4 text-hover">Interests</h1>
+            <p className="text-muted-foreground max-w-md mx-auto text-hover">
               A collection of things I enjoy outside of coding - photography, videos, books, and articles that inspire
               me.
             </p>
@@ -339,21 +340,19 @@ export default function InterestsPage() {
                     className="group interest-item cursor-pointer"
                     onClick={() => setSelectedImage(photo)}
                   >
-                    <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <Image
-                        src={photo.image || "/placeholder.svg"}
-                        alt={photo.title}
-                        fill
-                        className="object-cover hover-image"
-                      />
+                    <HoverImage
+                      src={photo.image || "/placeholder.svg"}
+                      alt={photo.title}
+                      className="aspect-square relative rounded-lg overflow-hidden"
+                    >
                       <div className="absolute inset-0 interest-overlay flex flex-col justify-end p-4">
                         <span className="inline-block text-xs font-medium bg-black/60 text-white backdrop-blur-sm px-2.5 py-1 rounded-full mb-2 w-fit">
                           {photo.category}
                         </span>
-                        <h3 className="font-medium text-white">{photo.title}</h3>
+                        <h3 className="font-medium text-white text-hover">{photo.title}</h3>
                         <p className="text-xs text-white/80 mt-1">Click to view gallery</p>
                       </div>
-                    </div>
+                    </HoverImage>
                   </div>
                 ))}
               </div>

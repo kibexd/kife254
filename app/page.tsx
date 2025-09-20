@@ -13,20 +13,66 @@ import { AnimatedEmoji } from "@/components/animated-emoji"
 import { LoadingDemo } from "@/components/loading-demo"
 import { motion, AnimatePresence } from "framer-motion"
 
+// Simple hover image component
+type HoverImageProps = {
+  src: string
+  alt: string
+  hoverSrc: string
+  className?: string
+  style?: React.CSSProperties
+}
+
+const HoverImage: React.FC<HoverImageProps> = ({ src, alt, hoverSrc, className, style }) => {
+  const [isHovered, setIsHovered] = useState(false)
+  
+  return (
+    <div 
+      className={className}
+      style={style}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Image
+        src={isHovered ? hoverSrc : src}
+        alt={alt}
+        fill
+        className="object-cover transition-all duration-500 hover:scale-105"
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
+    </div>
+  )
+}
+
 export default function Home() {
   const [showCVPreview, setShowCVPreview] = useState(false)
   const [isImageHovered, setIsImageHovered] = useState(false)
 
   return (
     <PageContainer>
-      <section className="container pt-32 pb-20 md:pt-40 md:pb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 slide-in-left">
+      <style jsx global>{`
+        main {
+          padding-top: 0px !important;
+          margin-top: 0px !important;
+        }
+        .sidebar-content {
+          padding-top: 40px !important;
+        }
+      `}</style>
+      <section 
+        className="container pb-2 min-h-screen flex items-center"
+        style={{ 
+          paddingTop: '0px !important',
+          marginTop: '0px !important',
+          padding: '0px 0px 8px 0px !important'
+        }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center w-full">
+          <div className="space-y-8 slide-in-left" style={{ textAlign: 'center', margin: '0 auto', maxWidth: '600px' }}>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight group">
               <AnimatedText 
                 englishText="Hi there" 
                 swahiliText="Habari" 
-                className="group-hover:text-primary transition-all duration-300 hover:cyber-glitch" 
+                className="group-hover:text-primary transition-all duration-300 text-hover" 
               />
               <span className="inline-block ml-2">
                 <AnimatedEmoji />
@@ -37,36 +83,35 @@ export default function Home() {
               <AnimatedText
                 englishText="I'm"
                 swahiliText="Naitwa"
-                className="inline-block mr-2 group-hover:text-primary"
+                className="inline-block mr-2 group-hover:text-primary text-hover"
                 delay={0.1}
               />
               <span className="text-foreground">
                 <AnimatedText
                   englishText="Enock Kibe"
                   swahiliText="Kife (Kajobe)"
-                  //emoji="😊"
-                  className="inline-block group-hover:text-primary"
+                  className="inline-block group-hover:text-primary text-hover"
                   delay={0.2}
                 />
               </span>
             </h2>
 
-            <p className="text-lg text-muted-foreground max-w-md">
+            <p className="text-lg text-muted-foreground" style={{ maxWidth: '500px', margin: '0 auto', textAlign: 'center' }}>
               Full Stack Developer specializing in Business Central 365, front-end web development, and ERP systems.
             </p>
 
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Button asChild className="apple-button glow-effect">
+            <div className="flex flex-wrap gap-4 pt-4" style={{ justifyContent: 'center' }}>
+              <Button asChild className="apple-button glow-effect rounded-lg px-6 py-3 font-medium transition-all duration-300 hover:scale-105">
                 <Link href="/projects">
                   View Projects <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button variant="outline" className="apple-button glow-effect" onClick={() => setShowCVPreview(true)}>
+              <Button variant="outline" className="apple-button glow-effect rounded-lg px-6 py-3 font-medium transition-all duration-300 hover:scale-105 border-primary/30 hover:border-primary" onClick={() => setShowCVPreview(true)}>
                 <Download className="mr-2 h-4 w-4" /> Download CV
               </Button>
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-6 pt-6" style={{ justifyContent: 'center' }}>
               <Link href="https://github.com/kibexd" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors icon-hover">
                 <Github className="h-5 w-5" />
                 <span className="sr-only">GitHub</span>
@@ -82,119 +127,66 @@ export default function Home() {
             </div>
           </div>
 
-          <div
-            className="relative w-full max-w-md h-[400px] mx-auto md:ml-auto slide-in-right profile-image-container progressive-blur rounded-3xl overflow-hidden border-2 glitch-border-hover"
+          <HoverImage
+            src="/dp1.jpg"
+            alt="Enock Kibe"
+            hoverSrc="/dp2.jpg"
+            className="relative w-full max-w-sm h-[350px] mx-auto lg:ml-auto slide-in-right profile-image-container rounded-3xl overflow-hidden border-2"
             style={{ 
               animationDelay: "0.2s",
-              isolation: "isolate" // Create stacking context
+              isolation: "isolate"
             }}
-            onMouseEnter={() => setIsImageHovered(true)}
-            onMouseLeave={() => setIsImageHovered(false)}
-          >
-            <AnimatePresence mode="wait">
-              {isImageHovered ? (
-                <motion.div
-                  key="alternate-image"
-                  initial={{ 
-                    opacity: 0, 
-                    scale: 1.05,
-                    rotateY: 90
-                  }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1,
-                    rotateY: 0
-                  }}
-                  exit={{ 
-                    opacity: 0, 
-                    scale: 0.95,
-                    rotateY: -90
-                  }}
-                  transition={{ 
-                    duration: 0.4,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }}
-                  className="absolute inset-0 glitch-pulse"
-                >
-                  <img
-                    src="/dp2.jpg"
-                    alt="Enock Kibe - Coding"
-                    className="w-full h-full object-cover profile-image"
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="main-image"
-                  initial={{ 
-                    opacity: 0, 
-                    scale: 1.05,
-                    rotateY: 90
-                  }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1,
-                    rotateY: 0
-                  }}
-                  exit={{ 
-                    opacity: 0, 
-                    scale: 0.95,
-                    rotateY: -90
-                  }}
-                  transition={{ 
-                    duration: 0.4,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }}
-                  className="absolute inset-0"
-                >
-                  <img
-                    src="/dp1.jpg"
-                    alt="Enock Kibe"
-                    className="w-full h-full object-cover profile-image"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+          />
+        </div>
+      </section>
+
+      <section className="bg-muted fade-in grainy-background py-4">
+        <div className="w-full flex justify-center">
+          <div className="max-w-4xl px-4">
+            <div className="flex flex-col items-center justify-center text-center w-full">
+              <QuoteDisplay />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-16 bg-muted fade-in">
-        <div className="container">
-          <QuoteDisplay />
-        </div>
-      </section>
+      <section className="bg-muted grainy-background">
+        <div className="container py-2">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 scale-in text-hover">Latest Projects</h2>
 
-      <section className="bg-muted py-20">
-        <div className="container">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12 scale-in">Latest Projects</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-website.vercel.app" },
-              { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects" },
-              { title: "Ivy's Website", image: "/ivy2.jpg?height=300&width=400", link: "/projects" },
-              { title: "Decentralized Voting System", image: "/votez.png?height=300&width=400", link: "/projects" },
+              { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-website.vercel.app", category: "Web Development", tags: "#react #nextjs" },
+              { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects", category: "Consulting", tags: "#business #website" },
+              { title: "Ivy's Website", image: "/ivy2.jpg?height=300&width=400", link: "/projects", category: "Portfolio", tags: "#personal #design" },
+              { title: "Decentralized Voting System", image: "/votez.png?height=300&width=400", link: "/projects", category: "Blockchain", tags: "#voting #decentralized" },
             ].map((project, index) => (
               <Link href={project.link} key={index} className="group fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="bg-card rounded-lg overflow-hidden border-2 hover-lift glitch-border-hover transition-all duration-300 hover:shadow-xl">
-                  <div className="aspect-video relative overflow-hidden progressive-blur corner-fade">
-                    <Image
-                      src={project.image || "/placeholder.svg"}
-                      alt={project.title}
-                      fill
-                      className="object-cover object-top transition-transform duration-500 group-hover:scale-110"
-                    />
+                <div className="grid-item-card bg-card rounded-lg overflow-hidden border-2 transition-all duration-300 hover:shadow-xl">
+                  <div 
+                    className="grid-item-img"
+                    style={{ backgroundImage: `url(${project.image || "/placeholder.svg"})` }}
+                  ></div>
+                  <div className="grid-item-box grid-item-box--a">
+                    <span className="grid-item-number">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="grid-item-tags">{project.tags}</span>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-medium group-hover:cyber-glitch transition-all duration-300">{project.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 group-hover:text-primary transition-colors duration-300">View project details</p>
+                  <div className="grid-item-box grid-item-box--b">
+                    <span className="grid-item-number">{String(index + 1).padStart(2, '0')}</span>
+                    <span className="grid-item-tags">{project.tags}</span>
+                  </div>
+                  <div className="grid-item-box grid-item-box--c">
+                    <span className="grid-item-category">{project.category}</span>
+                  </div>
+                  <div className="grid-item-box grid-item-box--d">
+                    <span className="grid-item-category">{project.category}</span>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
 
-          <div className="flex justify-center mt-12">
+          <div className="flex justify-center mt-3">
             <Button asChild variant="outline" className="apple-button glow-effect">
               <Link href="/projects">
                 View All Projects <ArrowRight className="ml-2 h-4 w-4" />
@@ -203,23 +195,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Loading Animation Demo */}
-      {/* <section className="py-16 bg-muted">
-        <div className="container">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 scale-in cyber-text">
-            🚀 Cool Loading Animations Demo
-          </h2>
-          <div className="text-center mb-6">
-            <p className="text-muted-foreground fade-in">
-              Click any button below to see the epic loading animation with glitch effects!
-            </p>
-          </div>
-          <div className="flex justify-center fade-in">
-            <LoadingDemo />
-          </div>
-        </div>
-      </section> */}
 
       <CVPreview open={showCVPreview} onOpenChange={setShowCVPreview} />
     </PageContainer>

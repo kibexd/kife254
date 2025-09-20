@@ -27,6 +27,7 @@ import Link from "next/link"
 import { useEffect, useState, useRef } from "react"
 import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
 import { CVPreview } from "@/components/cv-preview"
+import { HoverImage } from "@/components/hover-image"
 
 // Interfaces defined at the top of the file
 interface EducationItem {
@@ -639,86 +640,23 @@ export default function AboutPage() {
 
   return (
     <PageContainer>
-      <section className="container pt-32 pb-20">
+      <section className="container pt-32 pb-20 grainy-background">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 fade-in">
-            <h1 className="text-4xl font-bold tracking-tight mb-4">About Me</h1>
-            <p className="text-muted-foreground max-w-md mx-auto">Full Stack Developer & Cybersecurity Enthusiast</p>
+            <h1 className="text-4xl font-bold tracking-tight mb-4 text-hover">About Me</h1>
+            <p className="text-muted-foreground max-w-md mx-auto text-hover">Full Stack Developer & Cybersecurity Enthusiast</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 fade-in" style={{ animationDelay: "0.2s" }}>
-            <div
-              className="relative w-full max-w-md h-[400px] mx-auto profile-image-container rounded-3xl overflow-hidden border-2 glitch-border-hover"
+            <HoverImage
+              src="/kife.jpg"
+              alt="Enock Kibe"
+              hoverSrc="/dp3.jpg"
+              className="relative w-full max-w-md h-[400px] mx-auto profile-image-container rounded-3xl overflow-hidden border-2"
               style={{ 
                 isolation: "isolate"
               }}
-              onMouseEnter={() => setIsImageHovered(true)}
-              onMouseLeave={() => setIsImageHovered(false)}
-            >
-              <AnimatePresence mode="wait">
-                {isImageHovered ? (
-                  <motion.div
-                    key="alternate-image"
-                    initial={{ 
-                      opacity: 0, 
-                      scale: 1.05,
-                      rotateY: 90
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      scale: 1,
-                      rotateY: 0
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      scale: 0.95,
-                      rotateY: -90
-                    }}
-                    transition={{ 
-                      duration: 0.4,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    className="absolute inset-0 glitch-pulse"
-                  >
-                    <img
-                      src="/dp3.jpg"
-                      alt="Enock Kibe - Coding"
-                      className="w-full h-full object-cover profile-image"
-                    />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="main-image"
-                    initial={{ 
-                      opacity: 0, 
-                      scale: 1.05,
-                      rotateY: 90
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      scale: 1,
-                      rotateY: 0
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      scale: 0.95,
-                      rotateY: -90
-                    }}
-                    transition={{ 
-                      duration: 0.4,
-                      ease: [0.25, 0.46, 0.45, 0.94]
-                    }}
-                    className="absolute inset-0"
-                  >
-                    <img
-                      src="/kife.jpg"
-                      alt="Enock Kibe"
-                      className="w-full h-full object-cover profile-image"
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            />
 
             <div className="space-y-6 flex flex-col justify-center">
               <h2 className="text-2xl font-bold">Kife Mwenyewe</h2>
