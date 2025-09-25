@@ -59,6 +59,8 @@ export function CursorFollower() {
     }
 
     const handleMouseDown = () => {
+      cursor.dataset.variant = cursor.dataset.variant === 'interactive' ? 'interactive-active' : 'active'
+      follower.dataset.variant = cursor.dataset.variant
       gsap.to(cursor, {
         scale: 0.8,
         duration: 0.1
@@ -70,6 +72,8 @@ export function CursorFollower() {
     }
 
     const handleMouseUp = () => {
+      cursor.dataset.variant = cursor.dataset.variant?.includes('interactive') ? 'interactive' : 'default'
+      follower.dataset.variant = cursor.dataset.variant
       gsap.to(cursor, {
         scale: 1,
         duration: 0.1
@@ -81,18 +85,25 @@ export function CursorFollower() {
     }
 
     // Add hover effects for interactive elements
-    const handleHoverableEnter = () => {
+    const handleHoverableEnter = (e: Event) => {
+      if (cursor) {
+        const el = e.currentTarget as Element
+        cursor.dataset.variant = el && el.matches('input, textarea, select') ? 'crosshair' : 'interactive'
+      }
+      follower.dataset.variant = cursor.dataset.variant
       gsap.to(cursor, {
-        scale: 1.5,
+        scale: 1.2,
         duration: 0.2
       })
       gsap.to(follower, {
-        scale: 1.5,
+        scale: 1.3,
         duration: 0.2
       })
     }
 
     const handleHoverableLeave = () => {
+      if (cursor) cursor.dataset.variant = 'default'
+      follower.dataset.variant = 'default'
       gsap.to(cursor, {
         scale: 1,
         duration: 0.2
@@ -156,22 +167,22 @@ export function CursorFollower() {
       {/* Main cursor */}
       <div
         ref={cursorRef}
-        className="fixed top-0 left-0 w-4 h-4 bg-blue-500 rounded-full pointer-events-none mix-blend-difference"
+        className="fx-cursor fixed top-0 left-0 pointer-events-none"
         style={{
           transform: 'translate(-50%, -50%)',
           opacity: 0,
           zIndex: 99999
         }}
+        data-variant="default"
       />
       
       {/* Follower circle */}
       <div
         ref={followerRef}
-        className="fixed top-0 left-0 w-8 h-8 border-2 border-blue-400 rounded-full pointer-events-none"
+        className="fx-follower fixed top-0 left-0 pointer-events-none"
         style={{
           transform: 'translate(-50%, -50%)',
           opacity: 0,
-          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)',
           zIndex: 99998
         }}
       />
