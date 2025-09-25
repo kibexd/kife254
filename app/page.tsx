@@ -57,6 +57,17 @@ export default function Home() {
         .sidebar-content {
           padding-top: 40px !important;
         }
+        .glitch-line {
+          animation: glitch 0.3s infinite;
+        }
+        @keyframes glitch {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-2px); }
+          40% { transform: translateX(2px); }
+          60% { transform: translateX(-1px); }
+          80% { transform: translateX(1px); }
+          100% { transform: translateX(0); }
+        }
       `}</style>
       <section 
         className="container pb-2 min-h-screen flex items-center"
@@ -140,7 +151,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-muted fade-in grainy-background py-4">
+      <section className="bg-muted fade-in grainy-background py-12">
         <div className="w-full flex justify-center">
           <div className="max-w-4xl px-4">
             <div className="flex flex-col items-center justify-center text-center w-full">
@@ -150,36 +161,66 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-muted grainy-background">
-        <div className="container py-2">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 scale-in text-hover">Latest Projects</h2>
+      <section className="bg-gradient-to-b from-muted to-muted/50 grainy-background">
+        <div className="container py-16">
+          <div className="text-center mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold scale-in text-hover relative inline-block group cursor-pointer">
+              Latest Projects
+              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 group-hover:w-full group-hover:shadow-lg group-hover:shadow-blue-500/50 group-hover:animate-pulse group-hover:glitch-line"></span>
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Decorative line */}
+          <div className="flex items-center justify-center mb-12">
+            <div className="w-24 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+            <div className="mx-4 w-2 h-2 bg-primary rounded-full"></div>
+            <div className="w-24 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {[
               { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-website.vercel.app", category: "Web Development", tags: "#react #nextjs" },
               { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects", category: "Consulting", tags: "#business #website" },
-              { title: "Ivy's Website", image: "/ivy2.jpg?height=300&width=400", link: "/projects", category: "Portfolio", tags: "#personal #design" },
-              { title: "Decentralized Voting System", image: "/votez.png?height=300&width=400", link: "/projects", category: "Blockchain", tags: "#voting #decentralized" },
+              { title: "Ivy's Website", image: "/ivy2.jpg", link: "/projects", category: "Portfolio", tags: "#personal #design" },
+              { title: "Decentralized Voting System", image: "/votez.png", link: "/projects", category: "Blockchain", tags: "#voting #decentralized" },
             ].map((project, index) => (
               <Link href={project.link} key={index} className="group fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="grid-item-card bg-card rounded-lg overflow-hidden border-2 transition-all duration-300 hover:shadow-xl">
+                <div className="relative h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200/50 dark:border-slate-700/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-slate-900/20 dark:hover:shadow-slate-900/40">
+                  {/* Background Image */}
                   <div 
-                    className="grid-item-img"
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${project.image || "/placeholder.svg"})` }}
-                  ></div>
-                  <div className="grid-item-box grid-item-box--a">
-                    <span className="grid-item-number">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="grid-item-tags">{project.tags}</span>
+                  />
+                  
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/40 group-hover:via-black/10 transition-all duration-500" />
+                  
+                  {/* Glassmorphism panels - only visible on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                    {/* Top-left panel */}
+                    <div className="absolute top-3 left-3 bg-white/20 dark:bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/30 dark:border-white/20 shadow-lg">
+                      <div className="text-white text-lg font-bold mb-1">{String(index + 1).padStart(2, '0')}</div>
+                      <div className="text-white/80 text-xs font-medium">{project.tags}</div>
+                    </div>
+                    
+                    {/* Top-right panel with icon */}
+                    <div className="absolute top-3 right-3 bg-white/20 dark:bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/30 dark:border-white/20 shadow-lg">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Bottom panel */}
+                    <div className="absolute bottom-3 left-3 right-3 bg-white/20 dark:bg-white/10 backdrop-blur-xl rounded-xl p-3 border border-white/30 dark:border-white/20 shadow-lg">
+                      <div className="text-white text-sm font-semibold mb-1">{project.category}</div>
+                      <div className="text-white/80 text-xs font-medium truncate">{project.title}</div>
+                    </div>
                   </div>
-                  <div className="grid-item-box grid-item-box--b">
-                    <span className="grid-item-number">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="grid-item-tags">{project.tags}</span>
-                  </div>
-                  <div className="grid-item-box grid-item-box--c">
-                    <span className="grid-item-category">{project.category}</span>
-                  </div>
-                  <div className="grid-item-box grid-item-box--d">
-                    <span className="grid-item-category">{project.category}</span>
+                  
+                  {/* Default content - visible when not hovering */}
+                  <div className="absolute bottom-3 left-3 right-3 group-hover:opacity-0 transition-opacity duration-500">
+                    <div className="text-white text-sm font-semibold mb-1">{project.category}</div>
+                    <div className="text-white/80 text-xs font-medium truncate">{project.title}</div>
                   </div>
                 </div>
               </Link>
