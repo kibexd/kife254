@@ -198,10 +198,10 @@ export default function AboutPage() {
           name: "Umithio Consultancy Website",
           url: "https://umithio.netlify.app/",
         },
-        {
-          name: "Ivy's Website",
-          url: "https://ivyy.netlify.app/",
-        },
+        // {
+        //   name: "Ivy's Website",
+        //   url: "https://ivyy.netlify.app/",
+        // },
         {
           name: "Decentralized Voting System (Work in Progress)",
           url: "https://decentralizedvotingsystem.netlify.app/",
@@ -325,10 +325,10 @@ export default function AboutPage() {
           name: "Umithio Consultancy Website",
           url: "https://umithio.netlify.app/",
         },
-        {
-          name: "Ivy's Website",
-          url: "https://ivyy.netlify.app/",
-        },
+        // {
+        //   name: "Ivy's Website",
+        //   url: "https://ivyy.netlify.app/",
+        // },
         {
           name: "Decentralized Voting System (Work in Progress)",
           url: "https://decentralizedvotingsystem.netlify.app/",

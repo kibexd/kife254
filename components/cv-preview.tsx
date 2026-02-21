@@ -23,11 +23,12 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
         }
       `}</style>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="max-w-4xl w-[90vw] p-0 overflow-hidden bg-background"
-        style={{ zIndex: 1001, marginTop: '40px' }}
+      <DialogContent
+        className="max-w-5xl w-[96vw] p-0 overflow-hidden bg-background flex flex-col"
+        style={{ zIndex: 1001, marginTop: '40px', maxHeight: 'calc(92vh - 40px)' }}
       >
-        <div className="sticky top-0 z-10 flex justify-between items-center p-4 bg-background/80 backdrop-blur-sm border-b">
+        {/* ── Sticky header ── */}
+        <div className="shrink-0 sticky top-0 z-10 flex justify-between items-center p-4 bg-background/90 backdrop-blur-sm border-b">
           <DialogTitle className="text-xl">Enock Kibe - CV Preview</DialogTitle>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => onOpenChange(false)}>
@@ -45,7 +46,8 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
           </div>
         </div>
 
-        <div className="p-6 max-h-[80vh] overflow-y-auto">
+        {/* ── Scrollable body (flex-1 fills remaining space) ── */}
+        <div className="flex-1 overflow-y-auto p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="md:col-span-1">
               <div className="relative w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-primary/20">
@@ -78,30 +80,38 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1 space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                <h3 className="text-lg font-semibold mb-3 flex items-center hover-glitch">
                   <Star className="h-4 w-4 mr-2 text-primary" /> Technical Skills
                 </h3>
                 <div className="space-y-2">
                   {[
-                    "Microsoft Dynamics Business Central",
-                    "HTML, CSS, JavaScript",
-                    "React.js, Next.js",
-                    "REST APIs",
-                    "SQL, Database Design",
-                    "Docker basics",
-                    "Git/GitHub",
-                    "Windows/Linux Server Management",
+                    "Microsoft Dynamics 365 Business Central",
+                    "CAL / AL Programming & BC Extensions",
+                    "Navision → Business Central Migration",
+                    "TypeScript & JavaScript (ES6+)",
+                    "React.js / Next.js",
+                    "Node.js & REST / OData APIs",
+                    "SQL & Database Design",
+                    "Python (Scripting & Automation)",
+                    "Docker & Containerization",
+                    "Git / GitHub & CI/CD Pipelines",
+                    "Linux & Windows Server Administration",
+                    "Mobile App Development",
+                    "Cybersecurity Fundamentals",
+                    "ERP Systems Implementation",
+                    "Azure Cloud Fundamentals",
+                    "Agile / Scrum Methodology",
                   ].map((skill, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>{skill}</span>
+                    <div key={i} className="flex items-center gap-2 group/skill hover:text-primary transition-colors duration-200 cursor-default">
+                      <div className="w-2 h-2 rounded-full bg-primary shrink-0 group-hover/skill:scale-125 transition-transform"></div>
+                      <span className="text-sm">{skill}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                <h3 className="text-lg font-semibold mb-3 flex items-center hover-glitch">
                   <Star className="h-4 w-4 mr-2 text-primary" /> Languages
                 </h3>
                 <div className="space-y-2">
@@ -117,7 +127,7 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center">
+                <h3 className="text-lg font-semibold mb-3 flex items-center hover-glitch">
                   <Star className="h-4 w-4 mr-2 text-primary" /> Contact
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -129,7 +139,7 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
 
             <div className="md:col-span-2 space-y-8">
               <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2">
+                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2 hover-glitch">
                   <Briefcase className="h-5 w-5 mr-2 text-primary" /> Work Experience
                 </h3>
 
@@ -167,7 +177,7 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2">
+                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2 hover-glitch">
                   <GraduationCap className="h-5 w-5 mr-2 text-primary" /> Education
                 </h3>
 
@@ -194,7 +204,7 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2">
+                <h3 className="text-lg font-semibold mb-4 flex items-center border-b pb-2 hover-glitch">
                   <Star className="h-5 w-5 mr-2 text-primary" /> Projects
                 </h3>
 
@@ -216,7 +226,8 @@ export function CVPreview({ open, onOpenChange }: CVPreviewProps) {
           </div>
         </div>
 
-        <div className="sticky bottom-0 z-10 flex justify-between items-center p-4 bg-background/80 backdrop-blur-sm border-t">
+        {/* ── Sticky footer ── */}
+        <div className="shrink-0 sticky bottom-0 z-10 flex justify-between items-center p-4 bg-background/90 backdrop-blur-sm border-t">
           <DialogDescription>Download the full CV for complete details</DialogDescription>
           <Button size="sm" className="flex items-center gap-2" asChild>
             <a

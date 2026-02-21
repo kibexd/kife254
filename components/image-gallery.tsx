@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -39,15 +39,6 @@ export function ImageGallery({ isOpen, onClose, images, title, description, cate
             fill
             className="object-cover"
           />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 rounded-full bg-black/20 backdrop-blur-sm text-white hover:bg-black/40 hover:text-white"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </Button>
 
           {images.length > 1 && (
             <>

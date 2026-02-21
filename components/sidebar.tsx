@@ -156,9 +156,9 @@ export function Sidebar() {
     )}>
       <div className="p-6 flex flex-col items-center">
         <HoverImage
-          src="/dpp2.jpg"
+          src="/kife 4k.jpeg"
           alt="Enock Kibe"
-          hoverSrc="/dp1.jpg"
+          hoverSrc="/kife 4k.jpeg"
           className="relative w-8 h-8 overflow-hidden rounded-xl mb-4 profile-image-container border-2 aspect-square"
           style={{ isolation: "isolate" }}
         />
@@ -288,7 +288,7 @@ export function Sidebar() {
           <div className="kenya-flag-container relative flex items-center gap-1.5 group cursor-pointer">
             <span>254 Kenya</span>
             <Flag className="h-3 w-3 text-primary" />
-            <span>2025</span>
+            <span>{new Date().getFullYear()}</span>
 
             <div className="kenya-flag-colors absolute -inset-2 -z-10 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-500">
               <div className="absolute inset-0 bg-gradient-to-r from-black via-red-600 to-green-600 animate-gradient-x rounded-md blur-sm"></div>

@@ -80,10 +80,10 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 items-center w-full">
           <div className="space-y-8 slide-in-left" style={{ textAlign: 'center', margin: '0 auto', maxWidth: '600px' }}>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight group">
-              <AnimatedText 
-                englishText="Hi there" 
-                swahiliText="Habari" 
-                className="group-hover:text-primary transition-all duration-300 text-hover" 
+              <AnimatedText
+                englishText="Hi there"
+                swahiliText="Habari"
+                className="group-hover:text-primary transition-all duration-300"
               />
               <span className="inline-block ml-2">
                 <AnimatedEmoji />
@@ -94,14 +94,14 @@ export default function Home() {
               <AnimatedText
                 englishText="I'm"
                 swahiliText="Naitwa"
-                className="inline-block mr-2 group-hover:text-primary text-hover"
+                className="inline-block mr-2 group-hover:text-primary"
                 delay={0.1}
               />
               <span className="text-foreground">
                 <AnimatedText
                   englishText="Enock Kibe"
                   swahiliText="Kife (Kajobe)"
-                  className="inline-block group-hover:text-primary text-hover"
+                  className="inline-block group-hover:text-primary"
                   delay={0.2}
                 />
               </span>
@@ -139,9 +139,9 @@ export default function Home() {
           </div>
 
           <HoverImage
-            src="/dp1.jpg"
+            src="/kife 4k 1.jpeg"
             alt="Enock Kibe"
-            hoverSrc="/dp2.jpg"
+            hoverSrc="/kife 4k 1.jpeg"
             className="relative w-full max-w-sm h-[350px] mx-auto lg:ml-auto slide-in-right profile-image-container rounded-3xl overflow-hidden border-2"
             style={{ 
               animationDelay: "0.2s",
@@ -179,9 +179,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {[
-              { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-website.vercel.app", category: "Web Development", tags: "#react #nextjs" },
+              { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-test.vercel.app", category: "Web Development", tags: "#react #nextjs" },
               { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects", category: "Consulting", tags: "#business #website" },
-              { title: "Ivy's Website", image: "/ivy2.jpg", link: "/projects", category: "Portfolio", tags: "#personal #design" },
+              // { title: "Ivy's Website", image: "/ivy2.jpg", link: "/projects", category: "Portfolio", tags: "#personal #design" },
               { title: "Decentralized Voting System", image: "/votez.png", link: "/projects", category: "Blockchain", tags: "#voting #decentralized" },
             ].map((project, index) => (
               <Link href={project.link} key={index} className="group fade-in" style={{ animationDelay: `${index * 0.1}s` }}>

@@ -4,7 +4,20 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-const techEmojis = ["✨", "💻", "🚀", "⚡", "🔥", "🌐", "🛠️", "🔧", "📱", "🤖", "🧠", "🔍"]
+const techEmojis = [
+  // Dev fundamentals
+  "⚡", "💻", "🚀", "🔥", "🌐", "🤖", "🧠",
+  // Code & tools
+  "{ }", "< />", "🛠️", "🔧", "⚙️", "🔩", "🧩",
+  // Data & AI
+  "📡", "🔬", "🧬", "📊", "📈", "🗄️", "☁️",
+  // Security & infra
+  "🔐", "🛡️", "🔑", "🖧", "🏗️", "🐳", "🐧",
+  // Devices & signals
+  "📱", "🖥️", "⌨️", "🕹️", "📡", "💾", "💿",
+  // Fun / vibe
+  "✨", "🌟", "💡", "🎯", "🏆", "🎮", "🔮",
+]
 
 export function AnimatedEmoji() {
   const [currentEmojiIndex, setCurrentEmojiIndex] = useState(0)
@@ -13,17 +26,18 @@ export function AnimatedEmoji() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Trigger glitch effect before changing emoji
       setIsGlitching(true)
-      
+
+      // Change emoji at peak of glitch so the swap is hidden inside the distortion
       setTimeout(() => {
-        setCurrentEmojiIndex((prevIndex) => (prevIndex + 1) % techEmojis.length)
-      }, 100) // Faster emoji change
-      
+        setCurrentEmojiIndex((prev) => (prev + 1) % techEmojis.length)
+      }, 150)
+
+      // Hold glitch for full animation duration
       setTimeout(() => {
         setIsGlitching(false)
-      }, 800) // Keep glitch visible longer
-    }, 3000) // Change every 3 seconds
+      }, 550)
+    }, 2500) // Change every 2.5 seconds so glitch is more frequent
 
     return () => clearInterval(interval)
   }, [])
@@ -41,39 +55,21 @@ export function AnimatedEmoji() {
     <AnimatePresence mode="wait">
       <motion.span
         key={currentEmojiIndex}
-        initial={{ 
-          opacity: 0, 
-          rotateY: 90
-        }}
-        animate={{ 
-          opacity: 1, 
-          rotateY: 0
-        }}
-        exit={{ 
-          opacity: 0, 
-          rotateY: -90
-        }}
-        transition={{ 
-          duration: 0.2,
-          ease: [0.25, 0.46, 0.45, 0.94]
-        }}
+        initial={{ opacity: 0, scale: 0.6, y: -12 }}
+        animate={{ opacity: 1, scale: 1,   y: 0 }}
+        exit={{    opacity: 0, scale: 1.3,  y: 12 }}
+        transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
         onClick={handleClick}
         className={cn(
-          "inline-block transition-all duration-300 cursor-pointer select-none", 
-          "text-3xl sm:text-4xl md:text-5xl lg:text-6xl",
-          "leading-none",
+          "inline-block cursor-pointer select-none leading-none",
           (isGlitching || manualGlitch) && "glitch-emoji cyber-glitch"
         )}
         style={{
           transformOrigin: 'center',
           fontSize: 'clamp(2rem, 4vw, 3rem)',
         }}
-        whileHover={{ 
-          scale: 1.05
-        }}
-        whileTap={{ 
-          scale: 0.98
-        }}
+        whileHover={{ scale: 1.15, rotate: [0, -5, 5, 0] }}
+        whileTap={{ scale: 0.9 }}
       >
         {techEmojis[currentEmojiIndex]}
       </motion.span>

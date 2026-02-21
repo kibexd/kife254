@@ -11,71 +11,62 @@ interface AnimatedTextProps {
   emoji?: string
 }
 
-export function AnimatedText({ englishText, swahiliText, className = "", delay = 0, emoji = "" }: AnimatedTextProps) {
-  const [isHovered, setIsHovered] = useState(false)
+export function AnimatedText({
+  englishText,
+  swahiliText,
+  className = "",
+  delay = 0,
+  emoji = "",
+}: AnimatedTextProps) {
+  const [isHovered, setIsHovered]   = useState(false)
   const [isGlitching, setIsGlitching] = useState(false)
+
+  const triggerGlitch = () => {
+    setIsGlitching(true)
+    // CSS animation runs 2× at 0.36 s each (0.72 s total).
+    // Add extra buffer for the framer-motion `delay` prop so even
+    // delayed text swaps (e.g. "Enock Kibe" delay=0.2) stay glitchy
+    // throughout the full transition.
+    const hold = 750 + delay * 1200
+    setTimeout(() => setIsGlitching(false), hold)
+  }
 
   const handleHoverStart = () => {
     setIsHovered(true)
-    setIsGlitching(true)
-    // Stop glitch after animation completes
-    setTimeout(() => setIsGlitching(false), 200)
+    triggerGlitch()
   }
 
   const handleHoverEnd = () => {
     setIsHovered(false)
-    setIsGlitching(true)
-    // Stop glitch after animation completes
-    setTimeout(() => setIsGlitching(false), 200)
+    triggerGlitch()
   }
 
   return (
-    <div
+    <span
       className={`relative inline-block ${className}`}
       onMouseEnter={handleHoverStart}
       onMouseLeave={handleHoverEnd}
+      // Remove underline-hover from parent text-hover class
+      style={{ textDecoration: 'none' }}
     >
       <AnimatePresence mode="wait">
         <motion.span
           key={isHovered ? "swahili" : "english"}
-          initial={{ 
-            y: 5, 
-            opacity: 0,
-            rotateX: 10
+          initial={{ opacity: 0, y: -8, scale: 0.92 }}
+          animate={{ opacity: 1, y: 0,  scale: 1 }}
+          exit={{    opacity: 0, y:  8, scale: 1.05 }}
+          transition={{
+            duration: 0.14,
+            delay,
+            ease: [0.25, 0.46, 0.45, 0.94],
           }}
-          animate={{ 
-            y: 0, 
-            opacity: 1,
-            rotateX: 0
-          }}
-          exit={{ 
-            y: -5, 
-            opacity: 0,
-            rotateX: -10
-          }}
-          transition={{ 
-            duration: 0.15, 
-            delay: delay,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }}
-          className={`block transition-all duration-150 ${
-            isGlitching ? "text-transition-glitch" : ""
-          }`}
+          className={`inline-block whitespace-nowrap${isGlitching ? " text-transition-glitch" : ""}`}
         >
-          {isHovered ? swahiliText : englishText} {emoji && <span className="ml-1">{emoji}</span>}
+          {isHovered ? swahiliText : englishText}
+          {emoji && <span className="ml-1">{emoji}</span>}
         </motion.span>
       </AnimatePresence>
-      <motion.div 
-        className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary/30 via-primary to-primary/30"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: isHovered ? 1 : 0 }}
-        transition={{ duration: 0.15 }}
-        style={{
-          boxShadow: isHovered 
-            ? '0 0 8px rgba(var(--primary), 0.6), 0 0 16px rgba(var(--primary), 0.4)' 
-            : 'none'
-        }}
-      />
-    </div>
+      {/* Underline intentionally removed — glitch effect replaces it */}
+    </span>
   )
 }

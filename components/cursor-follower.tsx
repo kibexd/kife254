@@ -1,190 +1,102 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
 
 export function CursorFollower() {
   const cursorRef = useRef<HTMLDivElement>(null)
   const followerRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number>(0)
+  const pos = useRef({ mx: 0, my: 0, fx: 0, fy: 0 })
 
   useEffect(() => {
-    const cursor = cursorRef.current
-    const follower = followerRef.current
+    if (typeof window === 'undefined') return
+    if (window.matchMedia('(max-width: 768px)').matches) return
 
-    if (!cursor || !follower) return
+    const dot = cursorRef.current
+    const ring = followerRef.current
+    if (!dot || !ring) return
 
-    let mouseX = 0
-    let mouseY = 0
-    let followerX = 0
-    let followerY = 0
+    const p = pos.current
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX
-      mouseY = e.clientY
-
-      // Move cursor immediately
-      gsap.to(cursor, {
-        x: mouseX,
-        y: mouseY,
-        duration: 0,
-        ease: "none"
-      })
+    // Cursor dot moves instantly – no lag
+    const onMove = (e: MouseEvent) => {
+      p.mx = e.clientX
+      p.my = e.clientY
+      dot.style.transform = `translate(${p.mx}px,${p.my}px) translate(-50%,-50%)`
     }
 
-    const animateFollower = () => {
-      // Smooth follow animation
-      followerX += (mouseX - followerX) * 0.1
-      followerY += (mouseY - followerY) * 0.1
-
-      gsap.set(follower, {
-        x: followerX,
-        y: followerY
-      })
-
-      requestAnimationFrame(animateFollower)
+    // Follower lerps toward cursor – 0.15 is fast yet smooth
+    const tick = () => {
+      p.fx += (p.mx - p.fx) * 0.15
+      p.fy += (p.my - p.fy) * 0.15
+      ring.style.transform = `translate(${p.fx}px,${p.fy}px) translate(-50%,-50%)`
+      rafRef.current = requestAnimationFrame(tick)
     }
 
-    const handleMouseEnter = () => {
-      gsap.to([cursor, follower], {
-        opacity: 1,
-        duration: 0.3
-      })
+    const setVariant = (v: string) => {
+      dot.setAttribute('data-variant', v)
+      ring.setAttribute('data-variant', v)
     }
 
-    const handleMouseLeave = () => {
-      gsap.to([cursor, follower], {
-        opacity: 0,
-        duration: 0.3
-      })
+    const show = () => {
+      dot.style.opacity = '1'
+      ring.style.opacity = '1'
+    }
+    const hide = () => {
+      dot.style.opacity = '0'
+      ring.style.opacity = '0'
     }
 
-    const handleMouseDown = () => {
-      cursor.dataset.variant = cursor.dataset.variant === 'interactive' ? 'interactive-active' : 'active'
-      follower.dataset.variant = cursor.dataset.variant
-      gsap.to(cursor, {
-        scale: 0.8,
-        duration: 0.1
-      })
-      gsap.to(follower, {
-        scale: 1.2,
-        duration: 0.1
-      })
+    // Use event delegation instead of per-element listeners
+    const onOver = (e: MouseEvent) => {
+      const el = (e.target as Element).closest?.('a,button,[role=button],input,textarea,select,[data-interactive]')
+      setVariant(
+        el
+          ? el.matches('input,textarea,select') ? 'crosshair' : 'interactive'
+          : 'default'
+      )
     }
 
-    const handleMouseUp = () => {
-      cursor.dataset.variant = cursor.dataset.variant?.includes('interactive') ? 'interactive' : 'default'
-      follower.dataset.variant = cursor.dataset.variant
-      gsap.to(cursor, {
-        scale: 1,
-        duration: 0.1
-      })
-      gsap.to(follower, {
-        scale: 1,
-        duration: 0.1
-      })
+    const onDown = () => setVariant('active')
+    const onUp   = () => {
+      // restore: if still over interactive keep that state
+      const el = document.querySelectorAll('a:hover,button:hover,[role=button]:hover')
+      setVariant(el.length ? 'interactive' : 'default')
     }
 
-    // Add hover effects for interactive elements
-    const handleHoverableEnter = (e: Event) => {
-      if (cursor) {
-        const el = e.currentTarget as Element
-        cursor.dataset.variant = el && el.matches('input, textarea, select') ? 'crosshair' : 'interactive'
-      }
-      follower.dataset.variant = cursor.dataset.variant
-      gsap.to(cursor, {
-        scale: 1.2,
-        duration: 0.2
-      })
-      gsap.to(follower, {
-        scale: 1.3,
-        duration: 0.2
-      })
-    }
+    document.addEventListener('mousemove',  onMove, { passive: true })
+    document.addEventListener('mouseover',  onOver, { passive: true })
+    document.addEventListener('mouseenter', show)
+    document.addEventListener('mouseleave', hide)
+    document.addEventListener('mousedown',  onDown)
+    document.addEventListener('mouseup',    onUp)
 
-    const handleHoverableLeave = () => {
-      if (cursor) cursor.dataset.variant = 'default'
-      follower.dataset.variant = 'default'
-      gsap.to(cursor, {
-        scale: 1,
-        duration: 0.2
-      })
-      gsap.to(follower, {
-        scale: 1,
-        duration: 0.2
-      })
-    }
-
-    // Dynamic event listener for interactive elements
-    const addHoverListeners = () => {
-      const interactiveElements = document.querySelectorAll('a, button, [role="button"], input, textarea, select, nav a, header a, [data-interactive]')
-      interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', handleHoverableEnter)
-        el.addEventListener('mouseleave', handleHoverableLeave)
-      })
-      return interactiveElements
-    }
-
-    const removeHoverListeners = (elements: NodeListOf<Element>) => {
-      elements.forEach(el => {
-        el.removeEventListener('mouseenter', handleHoverableEnter)
-        el.removeEventListener('mouseleave', handleHoverableLeave)
-      })
-    }
-
-    // Event listeners
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseenter', handleMouseEnter)
-    document.addEventListener('mouseleave', handleMouseLeave)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('mouseup', handleMouseUp)
-
-    // Initial setup of hover effects
-    let interactiveElements = addHoverListeners()
-
-    // Re-scan for new interactive elements periodically (for dynamic content)
-    const rescanInterval = setInterval(() => {
-      removeHoverListeners(interactiveElements)
-      interactiveElements = addHoverListeners()
-    }, 1000)
-
-    // Start follower animation
-    animateFollower()
+    rafRef.current = requestAnimationFrame(tick)
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseenter', handleMouseEnter)
-      document.removeEventListener('mouseleave', handleMouseLeave)
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('mouseup', handleMouseUp)
-
-      removeHoverListeners(interactiveElements)
-      clearInterval(rescanInterval)
+      cancelAnimationFrame(rafRef.current)
+      document.removeEventListener('mousemove',  onMove)
+      document.removeEventListener('mouseover',  onOver)
+      document.removeEventListener('mouseenter', show)
+      document.removeEventListener('mouseleave', hide)
+      document.removeEventListener('mousedown',  onDown)
+      document.removeEventListener('mouseup',    onUp)
     }
   }, [])
 
   return (
     <>
-      {/* Main cursor */}
       <div
         ref={cursorRef}
-        className="fx-cursor fixed top-0 left-0 pointer-events-none"
-        style={{
-          transform: 'translate(-50%, -50%)',
-          opacity: 0,
-          zIndex: 99999
-        }}
+        className="fx-cursor fixed top-0 left-0 pointer-events-none select-none"
+        style={{ opacity: 0, zIndex: 99999, willChange: 'transform' }}
         data-variant="default"
       />
-      
-      {/* Follower circle */}
       <div
         ref={followerRef}
-        className="fx-follower fixed top-0 left-0 pointer-events-none"
-        style={{
-          transform: 'translate(-50%, -50%)',
-          opacity: 0,
-          zIndex: 99998
-        }}
+        className="fx-follower fixed top-0 left-0 pointer-events-none select-none"
+        style={{ opacity: 0, zIndex: 99998, willChange: 'transform' }}
+        data-variant="default"
       />
     </>
   )

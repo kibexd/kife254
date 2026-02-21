@@ -3,7 +3,7 @@
 import React from "react"
 
 export function MarqueeBanner() {
-  const marqueeText = "Enock Kibe • Full Stack Developer • Business Central Expert • Tech Enthusiast • ERP Systems Specialist • Web Development • Cybersecurity Enthusiast •"
+  const marqueeText = "Enock Kibe • Full Stack Developer • Business Central 365 Expert • CAL/AL Programming • Mobile App Dev • ERP Systems Specialist • Navision → BC Migration • Web Development • Latest BC Version • IT Professional • Cybersecurity Enthusiast •"
 
   return (
     <>
