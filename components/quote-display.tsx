@@ -48,19 +48,25 @@ const quotes = [
   },
 ]
 
+// Returns a stable quote index for the current hour (changes each new hour)
+const getHourlyIndex = () => {
+  const now = new Date()
+  // Combine day-of-year + hour so it cycles through quotes across hours/days
+  const dayOfYear = Math.floor(
+    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
+  )
+  return (dayOfYear * 24 + now.getHours()) % quotes.length
+}
+
 export function QuoteDisplay() {
-  const [currentQuote, setCurrentQuote] = useState(quotes[0])
-  const [quoteIndex, setQuoteIndex] = useState(0)
+  const [quoteIndex, setQuoteIndex] = useState(getHourlyIndex)
+  const [currentQuote, setCurrentQuote] = useState(() => quotes[getHourlyIndex()])
   const [isVisible, setIsVisible] = useState(true)
   const intervalRef = useRef(null)
 
-  // Function to change the quote
-  const changeQuote = () => {
+  const changeQuote = (nextIndex: number) => {
     setIsVisible(false)
-
-    // After exit animation completes, change the quote
     setTimeout(() => {
-      const nextIndex = (quoteIndex + 1) % quotes.length
       setQuoteIndex(nextIndex)
       setCurrentQuote(quotes[nextIndex])
       setIsVisible(true)
@@ -68,28 +74,25 @@ export function QuoteDisplay() {
   }
 
   useEffect(() => {
-    // Change quote every hour
-    intervalRef.current = setInterval(
-      () => {
-        changeQuote()
-      },
-      60 * 60 * 1000,
-    ) // 1 hour in milliseconds
+    // Calculate ms until the start of the next hour, then tick every hour
+    const msUntilNextHour = () => {
+      const now = new Date()
+      return (60 - now.getMinutes()) * 60 * 1000 - now.getSeconds() * 1000 - now.getMilliseconds()
+    }
+
+    // Fire at the top of the next hour, then every hour after
+    const timeout = setTimeout(() => {
+      changeQuote(getHourlyIndex())
+      intervalRef.current = setInterval(() => {
+        changeQuote(getHourlyIndex())
+      }, 60 * 60 * 1000)
+    }, msUntilNextHour())
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+      clearTimeout(timeout)
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
-  }, [quoteIndex])
-
-  // For demo purposes, you can uncomment this to change quotes more frequently
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     changeQuote()
-  //   }, 5000) // Change every 5 seconds for demo
-  //   return () => clearInterval(interval)
-  // }, [quoteIndex])
+  }, [])
 
   return (
     <div className="w-full max-w-4xl mx-auto">

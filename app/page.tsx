@@ -164,9 +164,9 @@ export default function Home() {
       <section className="bg-gradient-to-b from-muted to-muted/50 grainy-background">
         <div className="container py-16">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold scale-in text-hover relative inline-block group cursor-pointer">
+            <h2 className="text-2xl md:text-3xl font-bold scale-in relative inline-block group cursor-pointer">
               Latest Projects
-              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 group-hover:w-full group-hover:shadow-lg group-hover:shadow-blue-500/50 group-hover:animate-pulse group-hover:glitch-line"></span>
+              <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 group-hover:w-full group-hover:shadow-lg group-hover:shadow-blue-500/50"></span>
             </h2>
           </div>
 
@@ -177,14 +177,14 @@ export default function Home() {
             <div className="w-24 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-6 max-w-7xl mx-auto">
             {[
               { title: "Workers Rights Watch Website", image: "/wrw1.jpg", link: "https://workers-rights-watch-test.vercel.app", category: "Web Development", tags: "#react #nextjs" },
               { title: "Umithio Consultancy Website", image: "/umithio.png", link: "/projects", category: "Consulting", tags: "#business #website" },
               // { title: "Ivy's Website", image: "/ivy2.jpg", link: "/projects", category: "Portfolio", tags: "#personal #design" },
               { title: "Decentralized Voting System", image: "/votez.png", link: "/projects", category: "Blockchain", tags: "#voting #decentralized" },
             ].map((project, index) => (
-              <Link href={project.link} key={index} className="group fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+              <Link href={project.link} key={index} className="group fade-in w-full sm:w-72 lg:w-72" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="relative h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200/50 dark:border-slate-700/50 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-slate-900/20 dark:hover:shadow-slate-900/40">
                   {/* Background Image */}
                   <div 

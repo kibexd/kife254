@@ -22,7 +22,7 @@ export function PageContainer({ children, className }: PageContainerProps) {
     return (
       <div
         className={cn(
-          "flex min-h-screen",
+          "flex",
           "transition-all duration-300",
           className
         )}
@@ -31,10 +31,10 @@ export function PageContainer({ children, className }: PageContainerProps) {
         <MarqueeBanner />
         <Sidebar />
         <div className={cn(
-          "flex-1 flex flex-col sidebar-content min-h-screen",
+          "flex-1 flex flex-col sidebar-content",
           sidebarSide === "left" ? "ml-64" : "mr-64"
         )}>
-          <main className="flex-1 pt-0 min-h-screen">{children}</main>
+          <main className="flex-1 pt-0">{children}</main>
           <Footer className="w-full" />
         </div>
       </div>

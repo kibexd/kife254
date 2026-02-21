@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -51,7 +51,7 @@
     "input-otp": "1.4.1",
     "ldrs": "^1.1.7",
     "lucide-react": "^0.454.0",
-    "next": "16.1.6",
+    "next": "15.3.6",
     "next-themes": "latest",
     "nodemailer": "^7.0.3",
     "react": "^19",

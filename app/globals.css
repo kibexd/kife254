@@ -81,7 +81,6 @@
 .sidebar-content {
   margin-left: 16rem; /* 256px - back to standard width */
   transition: margin-left 0.3s ease;
-  min-height: 100vh;
   background: hsl(var(--background));
   padding-top: 40px; /* Account for marquee banner height */
 }
